@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الإلحاق والتحقيق للموارد البشرية</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        
+        :root {
+            --accent-lime: #c5f82a;
+            --accent-lime-hover: #b4ea17;
+            --dark-charcoal: #111315;
+            --light-bg: #f3f4f7;
+        }
+
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            background-color: var(--light-bg); 
+            color: #1e293b;
+        }
+
+        .timeline-gradient {
+            background: linear-gradient(to left, var(--accent-lime) 0%, #10b981 100%);
+            transition: width 0.5s ease-in-out;
+        }
+
+        .modal-overlay { 
+            background-color: rgba(17, 19, 21, 0.6); 
+            backdrop-filter: blur(8px); 
+        }
+
+        /* A4 Print Layout Styling */
+        .a4-print-box { 
+            width: 210mm; 
+            min-height: 297mm; 
+            background: white; 
+            margin: 0 auto; 
+            padding: 0; 
+            box-sizing: border-box; 
+            position: relative; 
+        }
+
+        .offer-table td, .offer-table th { 
+            padding: 8px 10px; 
+            border: 1px solid #e2e8f0; 
+            text-align: center; 
+            font-size: 12px; 
+        }
+
+        .offer-table th { 
+            background-color: #f8fafc; 
+            font-weight: 700; 
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+
+        .toast-notification {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden text-slate-900 bg-[#f3f4f7]">
+
+    <div id="toast-container" class="fixed top-5 left-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="portal-view" class="hidden fixed inset-0 z-50 bg-[#f3f4f7] overflow-y-auto p-4 md:p-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200/80 p-6 md:p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#111315] text-[#c5f82a] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-md">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                <h2 id="portal-welcome" class="text-3xl font-extrabold text-slate-900">أهلاً بك في بوابة الإلحاق</h2>
+                <p class="text-slate-500 mt-2 font-medium">يرجى استكمال البيانات والمرفقات التالية للبدء فوراً</p>
+            </div>
+            
+            <div id="portal-form-container">
+                <form id="portal-form" class="space-y-6">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-xs"><i class="fas fa-id-card"></i></span>
+                            البيانات الأساسية
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني</label>
+                                <input type="email" id="p-email" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-black font-semibold" placeholder="example@domain.com">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">العنوان الوطني المختصر</label>
+                                <input type="text" id="p-address" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-black font-semibold" placeholder="مثال: RRRD2929">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-xs"><i class="fas fa-university"></i></span>
+                            البيانات البنكية
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">رقم الآيبان (IBAN)</label>
+                            <div class="flex flex-row-reverse relative">
+                                <span class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-300 bg-slate-200 text-slate-700 font-extrabold">SA</span>
+                                <input type="text" id="p-iban" required maxlength="22" pattern="\d*" title="الرجاء إدخال أرقام فقط" class="flex-1 block w-full rounded-none rounded-r-xl border border-slate-300 p-3 text-left font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="0000000000000000000000" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-xs"><i class="fas fa-phone-alt"></i></span>
+                            بيانات الطوارئ
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">اسم الشخص للاتصال</label>
+                                <input type="text" id="p-contact-name" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-black font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">رقم الجوال</label>
+                                <input type="tel" id="p-contact-phone" required class="w-full border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-black font-semibold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-xs"><i class="fas fa-cloud-upload-alt"></i></span>
+                            المرفقات المطلوبة
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center transition-colors bg-white hover:bg-slate-100">
+                                <input type="file" id="p-file-id" class="hidden">
+                                <label for="p-file-id" class="cursor-pointer block">
+                                    <i class="fas fa-id-card text-3xl text-slate-400 mb-2"></i>
+                                    <div class="font-bold text-slate-800 text-sm">نسخة من الهوية الوطنية / الإقامة</div>
+                                    <div class="text-xs p-file-name-display text-slate-500 mt-1 font-semibold">اضغط للرفع</div>
+                                </label>
+                            </div>
+                            <div class="border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center transition-colors bg-white hover:bg-slate-100">
+                                <input type="file" id="p-file-cert" class="hidden">
+                                <label for="p-file-cert" class="cursor-pointer block">
+                                    <i class="fas fa-graduation-cap text-3xl text-slate-400 mb-2"></i>
+                                    <div class="font-bold text-slate-800 text-sm">المؤهل العلمي</div>
+                                    <div class="text-xs p-file-name-display text-slate-500 mt-1 font-semibold">اضغط للرفع</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#111315] hover:bg-black text-[#c5f82a] font-extrabold py-4 rounded-full transition-all shadow-lg text-base flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i> إرسال البيانات واعتمادها
+                    </button>
+                </form>
+            </div>
+            
+            <div id="portal-success" class="hidden text-center py-12">
+                <div class="w-20 h-20 bg-[#c5f82a] text-black rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-900">تم إرسال بياناتك بنجاح!</h2>
+                <p class="text-slate-600 mt-2 font-semibold">شكراً لك، جاري استكمال إجراءات الإلحاق من قبل الموارد البشرية.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="hr-layout" class="flex w-full h-full p-4 gap-4">
+        
+        <aside class="w-64 bg-[#111315] text-white flex flex-col rounded-3xl shadow-2xl p-4 justify-between border border-slate-800">
+            <div>
+                <div class="p-4 text-center border-b border-slate-800 mb-4">
+                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/10 shadow-inner overflow-hidden">
+                        <i class="fas fa-building text-2xl text-[#c5f82a]" id="sidebar-company-logo-icon"></i>
+                        <img id="sidebar-company-logo-img" src="" class="hidden w-full h-full object-contain rounded-2xl">
+                    </div>
+                    <h1 class="text-base font-extrabold truncate text-white" id="sidebar-company-name">إعدادات المنشأة</h1>
+                    <select id="company-switcher" onchange="window.changeCompany(this.value)" class="mt-2 w-full bg-slate-800 text-white border border-slate-700 rounded-xl p-2 text-xs font-bold outline-none cursor-pointer hover:bg-slate-700 transition">
+                        <!-- Options generated dynamically -->
+                    </select>
+                </div>
+                
+                <nav class="space-y-2">
+                    <button onclick="window.switchView('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 rounded-full bg-[#c5f82a] text-black font-extrabold transition-all shadow-md view-btn" id="btn-dashboard">
+                        <i class="fas fa-users text-lg"></i> الموظفون والإلحاق
+                    </button>
+                    <button onclick="window.switchView('reports')" class="w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-slate-800 text-slate-300 font-bold transition-all view-btn" id="btn-reports">
+                        <i class="fas fa-chart-bar text-lg"></i> مركز التقارير
+                    </button>
+                    <button onclick="window.switchView('settings')" class="w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-slate-800 text-slate-300 font-bold transition-all view-btn" id="btn-settings">
+                        <i class="fas fa-cog text-lg"></i> إعدادات المنشأة
+                    </button>
+                </nav>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold text-white">حالة النظام</span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#c5f82a] animate-pulse"></span>
+                </div>
+                <p>تم أتمتة الإلحاق بنجاح. الإصدار 3.6</p>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm relative">
+            
+            <header class="p-6 pb-2 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-3xl font-black tracking-tight text-slate-900" id="header-title">مساحة العمل</h2>
+                        <span class="px-3 py-1 rounded-full bg-black text-[#c5f82a] text-xs font-bold shadow-sm">نشط</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-semibold mt-1">إدارة مسارات إلحاق الموظفين، التقارير المتقدمة والمنشآت</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="window.exportToExcel()" class="px-4 py-2.5 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-all font-bold text-sm flex items-center gap-2 border border-slate-200">
+                        <i class="fas fa-file-excel text-emerald-600"></i> تصدير إكسل
+                    </button>
+                    <button onclick="window.openAddModal()" class="px-5 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full shadow-lg transition-all font-extrabold text-sm flex items-center gap-2">
+                        <i class="fas fa-plus"></i> إضافة موظف جديد
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6 pt-4 relative">
+                
+                <div id="view-dashboard" class="block space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-[#f8fafc] p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-slate-500">إجمالي الموظفين</p>
+                                <div class="flex items-baseline gap-2 mt-2">
+                                    <span class="text-3xl font-black text-slate-900" id="stat-total">0</span>
+                                </div>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-black text-[#c5f82a] flex items-center justify-center text-xl shadow-md"><i class="fas fa-users"></i></div>
+                        </div>
+
+                        <div class="bg-[#f8fafc] p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-slate-500">قيد الإلحاق</p>
+                                <div class="flex items-baseline gap-2 mt-2">
+                                    <span class="text-3xl font-black text-slate-900" id="stat-progress">0</span>
+                                </div>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl"><i class="fas fa-hourglass-half"></i></div>
+                        </div>
+
+                        <div class="bg-[#f8fafc] p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-slate-500">مكتمل 100%</p>
+                                <div class="flex items-baseline gap-2 mt-2">
+                                    <span class="text-3xl font-black text-slate-900" id="stat-completed">0</span>
+                                </div>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl"><i class="fas fa-check-circle"></i></div>
+                        </div>
+
+                        <div class="bg-[#f8fafc] p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p class="text-xs font-bold text-slate-500">المنشأة الحالية</p>
+                                <p class="text-base font-black text-slate-900 truncate mt-2" id="stat-company">شركة قيم</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl"><i class="fas fa-building"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
+                        <table class="w-full text-right border-collapse">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 text-xs font-extrabold text-slate-500">الاسم / المسمى الوظيفي</th>
+                                    <th class="p-4 text-xs font-extrabold text-slate-500">رقم الهوية</th>
+                                    <th class="p-4 text-xs font-extrabold text-slate-500">المرحلة الحالية</th>
+                                    <th class="p-4 text-xs font-extrabold text-slate-500">نسبة الاكتمال</th>
+                                    <th class="p-4 text-xs font-extrabold text-slate-500 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employees-table" class="divide-y divide-slate-100">
+                                <!-- Generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-reports" class="hidden space-y-6">
+                    <div class="flex justify-between items-center mb-4 border-b pb-4">
+                        <h3 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                            <span class="w-10 h-10 bg-black text-[#c5f82a] rounded-2xl flex items-center justify-center text-lg"><i class="fas fa-chart-bar"></i></span>
+                            مركز التقارير المتقدمة للموارد البشرية
+                        </h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- 1 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg"><i class="fas fa-chart-pie"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-indigo-600 transition-colors">تقارير القوى العاملة (Headcount)</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>العدد الإجمالي حسب الإدارات والفروع</li>
+                                <li>التركيبة الديموغرافية (جنسيات، أعمار)</li>
+                                <li>نسب التوطين ونطاقات</li>
+                            </ul>
+                        </div>
+                        <!-- 2 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fas fa-briefcase"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-blue-600 transition-colors">تقارير التوظيف والاستقطاب</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>المرشحين ومصادر الاستقطاب</li>
+                                <li>تكلفة ومدة التوظيف (Time to Hire)</li>
+                                <li>معدلات قبول العروض الوظيفية</li>
+                            </ul>
+                        </div>
+                        <!-- 3 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg"><i class="fas fa-clock"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-emerald-600 transition-colors">تقارير الحضور والغياب</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>ساعات العمل والإضافي (Overtime)</li>
+                                <li>معدلات التأخر والغياب</li>
+                                <li>التوازن بين الحضور الفعلي والمخطط</li>
+                            </ul>
+                        </div>
+                        <!-- 4 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fas fa-calendar-alt"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-amber-600 transition-colors">تقارير الإجازات</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>أرصدة الإجازات السنوية والمرضية</li>
+                                <li>الإجازات المجدولة والمستحقة</li>
+                                <li>تكاليف الاستبدال أو التعويض</li>
+                            </ul>
+                        </div>
+                        <!-- 5 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg"><i class="fas fa-money-check-alt"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-purple-600 transition-colors">تقارير الرواتب والأجور</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>مسير الرواتب الشهري (Payroll)</li>
+                                <li>حماية الأجور (WPS / مدد)</li>
+                                <li>مقارنات الرواتب مع السوق</li>
+                            </ul>
+                        </div>
+                        <!-- 6 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-lg"><i class="fas fa-shield-alt"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-teal-600 transition-colors">التأمينات ونهاية الخدمة</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>اشتراكات التأمينات (GOSI)</li>
+                                <li>مستحقات ومخصصات نهاية الخدمة</li>
+                                <li>تقارير الرعاية الطبية</li>
+                            </ul>
+                        </div>
+                        <!-- 7 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg"><i class="fas fa-chart-line"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-red-600 transition-colors">تقارير الأداء</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>نتائج التقييم السنوي/نصف السنوي</li>
+                                <li>توزيع التقييمات الشاملة</li>
+                                <li>مؤشرات الأداء الرئيسية (KPIs)</li>
+                            </ul>
+                        </div>
+                        <!-- 8 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg"><i class="fas fa-chalkboard-teacher"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-orange-600 transition-colors">التدريب والتطوير</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>المتدربين وساعات التدريب</li>
+                                <li>تكلفة التدريب لكل موظف</li>
+                                <li>قياس أثر التدريب ورضا المتدربين</li>
+                            </ul>
+                        </div>
+                        <!-- 9 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-lg"><i class="fas fa-door-open"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-pink-600 transition-colors">الدوران الوظيفي (Turnover)</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>معدل الدوران الطوعي وغير الطوعي</li>
+                                <li>معدل الاحتفاظ بالمواهب (Retention)</li>
+                                <li>تحليل أسباب الخروج والاستقالات</li>
+                            </ul>
+                        </div>
+                        <!-- 10 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-lg"><i class="fas fa-file-contract"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-cyan-600 transition-colors">الامتثال والالتزام</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>الامتثال لوزارة الموارد البشرية</li>
+                                <li>سجلات عقود العمل والتحقق</li>
+                                <li>منصات قوى ومدد</li>
+                            </ul>
+                        </div>
+                        <!-- 11 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg"><i class="fas fa-smile-beam"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-rose-600 transition-colors">رضا الموظفين والمشاركة</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>استطلاعات الرضا (Engagement)</li>
+                                <li>مؤشر ترويج الموظفين (eNPS)</li>
+                                <li>تحليل بيئة العمل</li>
+                            </ul>
+                        </div>
+                        <!-- 12 -->
+                        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group" onclick="window.showToast('جاري تجهيز التقرير وعرض البيانات...', 'success')">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-200 text-slate-800 flex items-center justify-center text-lg"><i class="fas fa-chess-knight"></i></div>
+                                <h4 class="font-black text-sm text-slate-900 group-hover:text-slate-800 transition-colors">التقارير الاستراتيجية</h4>
+                            </div>
+                            <ul class="text-[11px] text-slate-600 space-y-1.5 font-bold list-disc list-inside">
+                                <li>لوحات المؤشرات للإدارة (Dashboards)</li>
+                                <li>الموازنة والتخطيط للقوى العاملة</li>
+                                <li>مقارنة الأهداف بالنتائج</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-settings" class="hidden max-w-5xl mx-auto">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
+                        <div class="flex justify-between items-center border-b pb-4 mb-6">
+                            <h3 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                                <span class="w-10 h-10 bg-black text-[#c5f82a] rounded-2xl flex items-center justify-center text-lg"><i class="fas fa-building"></i></span>
+                                إعدادات المنشأة والأختام الرسمية
+                            </h3>
+                            <button type="button" onclick="window.addNewCompany()" class="px-5 py-2.5 bg-[#c5f82a] text-black hover:bg-[#b4ea17] font-extrabold rounded-full text-xs shadow-md transition-all flex items-center gap-2">
+                                <i class="fas fa-plus"></i> إضافة منشأة جديدة
+                            </button>
+                        </div>
+                        
+                        <form id="company-settings-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-2">اسم المنشأة (عربي)</label>
+                                    <input type="text" id="comp-name-ar" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-2">اسم المنشأة (إنجليزي)</label>
+                                    <input type="text" id="comp-name-en" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-2">رقم السجل التجاري</label>
+                                    <input type="text" id="comp-cr" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-2">العنوان والمدينة</label>
+                                    <input type="text" id="comp-address" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold">
+                                </div>
+                            </div>
+                            
+                            <h4 class="text-base font-extrabold mb-2 text-slate-900 mt-8 pt-6 border-t border-slate-200">الأختام والتواقيع (المعتمدة في نماذج العروض)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <!-- Logo -->
+                                <div class="border border-slate-200 rounded-2xl p-4 text-center bg-slate-50 flex flex-col">
+                                    <p class="font-bold mb-2 text-xs text-slate-700">شعار المنشأة (Logo)</p>
+                                    <input type="file" id="comp-logo" accept="image/*" class="hidden">
+                                    <label for="comp-logo" class="cursor-pointer flex-1 block bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl hover:bg-slate-100 transition flex flex-col items-center justify-center">
+                                        <img id="prev-logo" src="" class="hidden mx-auto max-h-16 mb-2 rounded-lg object-contain">
+                                        <i class="fas fa-image text-2xl text-slate-400"></i>
+                                        <p class="text-[10px] text-slate-500 font-bold mt-2">اضغط للرفع</p>
+                                    </label>
+                                </div>
+
+                                <!-- Stamp -->
+                                <div class="border border-slate-200 rounded-2xl p-4 text-center bg-slate-50 flex flex-col">
+                                    <p class="font-bold mb-2 text-xs text-slate-700">الختم الرسمي (Stamp)</p>
+                                    <input type="file" id="comp-stamp" accept="image/png" class="hidden">
+                                    <label for="comp-stamp" class="cursor-pointer flex-1 block bg-white border-2 border-dashed border-slate-300 p-4 rounded-xl hover:bg-slate-100 transition flex flex-col items-center justify-center">
+                                        <img id="prev-stamp" src="" class="hidden mx-auto max-h-16 mb-2 rounded-lg object-contain">
+                                        <i class="fas fa-stamp text-2xl text-slate-400"></i>
+                                        <p class="text-[10px] text-slate-500 font-bold mt-2">رفع كـ PNG</p>
+                                    </label>
+                                </div>
+
+                                <!-- Sign 1 -->
+                                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 flex flex-col">
+                                    <p class="font-bold mb-2 text-xs text-slate-700 text-center">التوقيع الأول</p>
+                                    <input type="text" id="comp-sign1-title" class="w-full mb-2 p-2 border rounded-lg text-xs font-bold text-center" placeholder="المسمى (مثال: الموارد البشرية)">
+                                    <input type="text" id="comp-sign1-name" class="w-full mb-2 p-2 border rounded-lg text-xs font-bold text-center" placeholder="اسم الموقّع">
+                                    <input type="file" id="comp-sign1" accept="image/png" class="hidden">
+                                    <label for="comp-sign1" class="cursor-pointer block bg-white border-2 border-dashed border-slate-300 p-2 rounded-xl hover:bg-slate-100 text-center flex-1 flex flex-col items-center justify-center">
+                                        <img id="prev-sign1" src="" class="hidden mx-auto max-h-12 mb-1 rounded-lg object-contain">
+                                        <i class="fas fa-signature text-xl text-slate-400"></i>
+                                        <p class="text-[10px] text-slate-500 font-bold mt-1">توقيع (PNG)</p>
+                                    </label>
+                                </div>
+
+                                <!-- Sign 2 -->
+                                <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50 flex flex-col">
+                                    <p class="font-bold mb-2 text-xs text-slate-700 text-center">التوقيع الثاني (إضافي)</p>
+                                    <input type="text" id="comp-sign2-title" class="w-full mb-2 p-2 border rounded-lg text-xs font-bold text-center" placeholder="المسمى (مثال: المدير العام)">
+                                    <input type="text" id="comp-sign2-name" class="w-full mb-2 p-2 border rounded-lg text-xs font-bold text-center" placeholder="اسم الموقّع">
+                                    <input type="file" id="comp-sign2" accept="image/png" class="hidden">
+                                    <label for="comp-sign2" class="cursor-pointer block bg-white border-2 border-dashed border-slate-300 p-2 rounded-xl hover:bg-slate-100 text-center flex-1 flex flex-col items-center justify-center">
+                                        <img id="prev-sign2" src="" class="hidden mx-auto max-h-12 mb-1 rounded-lg object-contain">
+                                        <i class="fas fa-signature text-xl text-slate-400"></i>
+                                        <p class="text-[10px] text-slate-500 font-bold mt-1">توقيع (PNG)</p>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-slate-200 flex justify-end">
+                                <button type="button" onclick="window.saveCompanySettings()" class="bg-[#111315] hover:bg-black text-[#c5f82a] font-extrabold py-3.5 px-10 rounded-full shadow-lg transition-all flex items-center gap-2 text-sm">
+                                    <i class="fas fa-save"></i> حفظ إعدادات المنشأة واعتمادها
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="add-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-200">
+            <div class="flex justify-between items-center p-6 border-b bg-slate-50 rounded-t-3xl">
+                <h3 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-sm"><i class="fas fa-user-plus"></i></span>
+                    <span id="modal-title-text">إضافة موظف جديد</span>
+                </h3>
+                <button onclick="window.closeAddModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 font-bold">&times;</button>
+            </div>
+            
+            <form id="add-form" class="p-6 space-y-6">
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                    <h4 class="font-bold text-slate-800 mb-4">البيانات الشخصية والوظيفية</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهوية / الإقامة <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-nid" required maxlength="10" minlength="10" pattern="\d{10}" title="يجب إدخال 10 أرقام بالضبط" oninput="this.value = this.value.replace(/[^0-9]/g, ''); window.detectNationality();" class="w-full border rounded-xl p-3 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="10 أرقام">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الجنسية</label>
+                            <select id="emp-nationality" class="w-full border rounded-xl p-3 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                                <option value="">اختر الجنسية</option>
+                                <option value="سعودي">سعودي</option>
+                                <option value="مصري">مصري</option>
+                                <option value="أردني">أردني</option>
+                                <option value="سوداني">سوداني</option>
+                                <option value="فلبيني">فلبيني</option>
+                                <option value="هندي">هندي</option>
+                                <option value="أخرى">أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الرباعي <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-name" required class="w-full border rounded-xl p-3 font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="الاسم كامل">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المسمى الوظيفي <span class="text-red-500">*</span></label>
+                            <input type="text" id="emp-job" required class="w-full border rounded-xl p-3 font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="محاسب / مهندس">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ المباشرة المتوقع</label>
+                            <input type="date" id="emp-date" required class="w-full border rounded-xl p-3 font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">مدة العقد</label>
+                            <select id="emp-contract-duration" class="w-full border rounded-xl p-3 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                                <option value="سنة واحدة">سنة واحدة</option>
+                                <option value="سنتان">سنتان</option>
+                                <option value="غير محدد">غير محدد (مفتوح)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-slate-800">التفاصيل المالية والراتب</h4>
+                        <label class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-extrabold text-slate-700 cursor-pointer shadow-sm">
+                            <input type="checkbox" id="gosi-new-system" class="w-4 h-4 rounded text-black focus:ring-black" onchange="window.triggerSalaryRecalc()">
+                            تطبيق نظام التأمينات الجديد
+                        </label>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">الراتب الإجمالي (توزيع تلقائي)</label>
+                        <div class="relative">
+                            <input type="number" id="emp-total-salary" required class="w-full border-2 border-slate-300 rounded-xl p-3 text-xl font-black bg-white focus:outline-none focus:border-black" placeholder="أدخل إجمالي الراتب" oninput="window.distributeSalary(this.value)">
+                            <span class="absolute left-4 top-3.5 text-slate-400 font-extrabold">ريال</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-white rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">الراتب الأساسي</label>
+                            <input type="number" id="emp-basic" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">بدل السكن</label>
+                            <input type="number" id="emp-housing" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">بدل النقل</label>
+                            <input type="number" id="emp-transport" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-red-500 mb-1">خصم التأمينات (GOSI)</label>
+                            <input type="number" id="emp-gosi-deduction" readonly class="w-full border-b-2 border-red-200 bg-red-50 text-red-600 p-2 font-bold rounded-lg cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="window.closeAddModal()" class="px-6 py-2.5 rounded-full border border-slate-300 hover:bg-slate-100 font-bold text-xs">إلغاء</button>
+                    <button type="submit" class="px-8 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full font-extrabold text-xs shadow-lg">حفظ الموظف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="details-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-overlay p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col border border-slate-200">
+            <div class="flex justify-between items-center p-6 border-b bg-slate-50 rounded-t-3xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-black text-[#c5f82a] flex items-center justify-center text-xl font-black shadow-md" id="d-avatar">أ</div>
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-900" id="d-name">اسم الموظف</h3>
+                        <p class="text-xs text-slate-500 font-bold" id="d-job">المسمى الوظيفي</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.editEmployee()" class="px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-full font-extrabold text-xs flex items-center gap-1 transition"><i class="fas fa-edit"></i> تعديل</button>
+                    <button onclick="window.deleteEmployee()" class="px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-full font-extrabold text-xs flex items-center gap-1 transition"><i class="fas fa-trash"></i> حذف</button>
+                    <button onclick="window.closeDetailsModal()" class="w-8 h-8 ml-4 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 font-bold">&times;</button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 bg-[#f8fafc] space-y-6">
+                <div class="flex flex-wrap gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 items-center">
+                    <button onclick="window.generateOfferPDF()" class="px-5 py-2.5 bg-[#111315] hover:bg-black text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2">
+                        <i class="fas fa-file-pdf text-[#c5f82a]"></i> إنشاء العرض الوظيفي (PDF)
+                    </button>
+                    <button onclick="window.generatePortalLink()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2">
+                        <i class="fas fa-link"></i> توليد رابط البوابة للموظف
+                    </button>
+                    <button onclick="window.previewPortal()" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2">
+                        <i class="fas fa-eye"></i> معاينة البوابة
+                    </button>
+                    
+                    <div class="flex-1"></div>
+                    
+                    <button id="btn-print-report" onclick="window.printCompletionReport()" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2 animate-pulse">
+                        <i class="fas fa-check-double text-[#c5f82a]"></i> تقرير الاكتمال (Checklist)
+                    </button>
+                </div>
+                
+                <div id="link-area" class="hidden bg-amber-50 p-4 rounded-2xl border border-amber-200 flex items-center gap-3">
+                    <input type="text" id="portal-link-input" readonly class="flex-1 border-0 bg-white p-3 rounded-xl text-left text-xs font-mono text-slate-700 font-bold focus:ring-2 focus:ring-amber-400">
+                    <button onclick="window.copyPortalLink()" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-full font-extrabold text-xs">نسخ</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-black text-slate-900 text-base">مسار إلحاق الموظف</h4>
+                        <span id="d-progress-text" class="px-4 py-1.5 bg-slate-100 text-slate-800 font-extrabold rounded-full text-xs">20% مكتمل</span>
+                    </div>
+                    
+                    <div class="relative pt-4 pb-8">
+                        <div class="absolute top-8 left-10 right-10 h-2 bg-slate-100 rounded-full z-0"></div>
+                        <div id="d-timeline-bar" class="absolute top-8 right-10 h-2 rounded-full z-0 timeline-gradient" style="width: 20%;"></div>
+                        
+                        <div class="relative z-10 flex justify-between px-2" id="timeline-nodes-container">
+                            <!-- Stepper nodes rendered via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                    <h4 class="font-black text-slate-900 mb-4 border-b pb-3 flex items-center gap-2 text-base">
+                        <i class="fas fa-tasks text-slate-800"></i> حالة المستندات والمهام
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="d-checklist-container">
+                        <!-- Checklist options generated dynamically -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                        <h4 class="font-black text-slate-800 mb-4 border-b pb-2 text-sm">التفاصيل المالية</h4>
+                        <div class="space-y-3 text-xs font-semibold">
+                            <div class="flex justify-between"><span class="text-slate-500">إجمالي الراتب:</span> <span class="font-bold text-slate-900" id="d-total">0</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">الراتب الأساسي:</span> <span class="font-bold text-slate-900" id="d-basic">0</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">بدل السكن:</span> <span class="font-bold text-slate-900" id="d-housing">0</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">بدل النقل:</span> <span class="font-bold text-slate-900" id="d-transport">0</span></div>
+                            <div class="flex justify-between border-t pt-2 mt-2"><span class="text-red-500 font-bold">خصم التأمينات:</span> <span class="font-bold text-red-600" id="d-gosi">0</span></div>
+                            <div class="flex justify-between bg-slate-900 text-white p-3 rounded-2xl mt-2"><span class="font-bold text-[#c5f82a]">صافي الراتب:</span> <span class="font-black text-white text-base" id="d-net">0</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                        <h4 class="font-black text-slate-800 mb-4 border-b pb-2 text-sm">البيانات الإضافية (من البوابة)</h4>
+                        <div class="space-y-3 text-xs font-semibold">
+                            <div class="flex justify-between"><span class="text-slate-500">رقم الهوية:</span> <span class="font-bold text-slate-900" id="d-nid">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">الجنسية:</span> <span class="font-bold text-slate-900" id="d-nationality">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">الآيبان:</span> <span class="font-bold font-mono text-left" dir="ltr" id="d-iban">لم يُسجل</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">العنوان:</span> <span class="font-bold text-slate-900" id="d-address">لم يُسجل</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">التواصل الطوارئ:</span> <span class="font-bold text-slate-900" id="d-emergency">لم يُسجل</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">المرفقات:</span> <span class="font-bold text-slate-900" id="d-files">غير مكتمل</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tasks-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 border border-slate-200">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 class="text-base font-black text-slate-900" id="tm-title">مهام المرحلة</h3>
+                <button onclick="window.closeTasksModal()" class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold">&times;</button>
+            </div>
+            <div id="tm-list" class="space-y-3 mb-6">
+                <!-- Checkbox list items rendered dynamically -->
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-200">
+                <button onclick="window.closeTasksModal()" class="px-4 py-2 rounded-full border border-slate-300 text-xs font-bold text-slate-600">إلغاء</button>
+                <button onclick="window.saveTasksProgress()" class="px-6 py-2 bg-[#111315] text-[#c5f82a] rounded-full text-xs font-extrabold shadow">حفظ التقدم</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-container" class="hidden">
+        <div id="pdf-content" class="a4-print-box flex flex-col font-sans" style="font-family: Arial, sans-serif;">
+            <div class="h-[120px] bg-[#111315] text-white flex justify-between items-center px-10 rounded-b-3xl">
+                <div>
+                    <h1 class="text-3xl font-extrabold mb-1" id="pdf-comp-name-ar">شركة قيم للتعلم</h1>
+                    <p class="text-lg opacity-80 font-bold" id="pdf-comp-name-en">QYEM Company</p>
+                </div>
+                <img id="pdf-logo-img" src="" class="h-20 bg-white p-2 rounded-xl object-contain hidden">
+            </div>
+
+            <div class="text-center mt-6 mb-4">
+                <h2 class="text-2xl font-black text-[#111315]">نموذج عرض عمل</h2>
+                <h3 class="text-xl text-slate-700 font-bold">Job Offer</h3>
+                <p class="text-xs text-gray-500 mt-1">الموارد البشرية - نموذج إلحاق معتمد</p>
+            </div>
+
+            <div class="px-10 flex-1">
+                <table class="w-full offer-table mb-4" dir="ltr">
+                    <tr>
+                        <td class="font-bold text-right" dir="rtl">الاسم:</td>
+                        <td class="font-extrabold text-blue-950 text-center text-lg" id="pdf-name"></td>
+                        <td class="font-bold text-left">Name:</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right" dir="rtl">الجنسية:</td>
+                        <td class="text-center font-bold" id="pdf-nationality"></td>
+                        <td class="font-bold text-left">Nationality:</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right" dir="rtl">الوظيفة:</td>
+                        <td class="text-center font-bold text-slate-900" id="pdf-job"></td>
+                        <td class="font-bold text-left">Position:</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right" dir="rtl">مدة العقد:</td>
+                        <td class="text-center font-bold" id="pdf-duration">سنة</td>
+                        <td class="font-bold text-left">Duration:</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right" dir="rtl">تاريخ الالتحاق:</td>
+                        <td class="text-center font-bold" id="pdf-date"></td>
+                        <td class="font-bold text-left">Start Date:</td>
+                    </tr>
+                </table>
+
+                <div class="text-center mb-2 font-black text-lg text-[#111315] border-b pb-1">الراتب والمميزات Salary & Benefits</div>
+                <table class="w-full offer-table mb-4" dir="ltr">
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" dir="rtl">أساسي</td>
+                        <td class="font-extrabold text-slate-900" id="pdf-basic"></td>
+                        <td class="text-gray-600 text-xs">ريال سعودي SAR</td>
+                        <td class="font-bold text-left bg-slate-50">Basic Salary</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" dir="rtl">بدل سكن</td>
+                        <td class="font-extrabold text-slate-900" id="pdf-housing"></td>
+                        <td class="text-gray-600 text-xs">ريال سعودي SAR</td>
+                        <td class="font-bold text-left bg-slate-50">Housing Allow.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" dir="rtl">بدل النقل</td>
+                        <td class="font-extrabold text-slate-900" id="pdf-transport"></td>
+                        <td class="text-gray-600 text-xs">ريال سعودي SAR</td>
+                        <td class="font-bold text-left bg-slate-50">Transport Allow.</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right bg-[#111315] text-white" dir="rtl">إجمالي الراتب</td>
+                        <td class="font-black text-xl text-slate-950 bg-slate-100" id="pdf-total"></td>
+                        <td class="text-gray-600 bg-slate-100 text-xs">ريال سعودي SAR</td>
+                        <td class="font-bold text-left bg-[#111315] text-white">Total Salary</td>
+                    </tr>
+                </table>
+
+                <table class="w-full offer-table mb-4" dir="ltr">
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" width="25%" dir="rtl">العلاج الطبي</td>
+                        <td class="text-center font-bold text-xs" width="50%">حسب اللوائح الداخلية للشركة</td>
+                        <td class="font-bold text-left bg-slate-50" width="25%">Health Care</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" dir="rtl">إجازة سنوية</td>
+                        <td class="text-center font-bold text-xs">21 يوم / مدفوعة الأجر</td>
+                        <td class="font-bold text-left bg-slate-50">Annual Vacation</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-right bg-slate-50" dir="rtl">الدوام الرسمي</td>
+                        <td class="text-center font-bold text-xs">8 ساعات يومياً لمدة 6 أيام في الأسبوع</td>
+                        <td class="font-bold text-left bg-slate-50">Working Hours</td>
+                    </tr>
+                </table>
+
+                <div class="text-[10px] text-gray-700 leading-relaxed grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div dir="rtl" class="text-right border-l pl-4">
+                        <ul class="list-disc pr-4 space-y-1">
+                            <li>لا يشكل هذا العرض أي التزام على الشركة حتى توقيع عقد العمل.</li>
+                            <li>تسري صلاحية هذا العرض لمدة خمسة أيام فقط.</li>
+                            <li>يخضع الراتب لاستقطاع التأمينات الاجتماعية حسب الأنظمة.</li>
+                        </ul>
+                    </div>
+                    <div dir="ltr" class="text-left">
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>This offer does not constitute any obligation until contract is signed.</li>
+                            <li>Valid for 5 days only, considered void if not accepted.</li>
+                            <li>Salary is subject to social insurance deduction (GOSI).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-6 border-t pt-4 grid grid-cols-3 gap-2 text-center text-[10px]">
+                    <div class="border-l border-slate-300" dir="rtl">
+                        <p class="font-bold mb-2">قرار المرشح:</p>
+                        <p class="mb-1"><span class="inline-block w-3 h-3 border border-black mr-1 text-center leading-3"></span> أوافق على العرض</p>
+                        <p class="mb-1"><span class="inline-block w-3 h-3 border border-black mr-1 text-center leading-3"></span> لا أوافق</p>
+                        <p class="mt-2">الاسم: .................................</p>
+                        <p class="mt-2">التوقيع: .................................</p>
+                    </div>
+                    <div class="border-l border-slate-300 relative h-28" dir="rtl">
+                        <p class="font-black text-[#111315] mb-1" id="pdf-sign1-title">الموارد البشرية</p>
+                        <p class="text-slate-600 mb-2 font-bold" id="pdf-sign1-name"></p>
+                        <img id="pdf-sign1-img" src="" class="h-12 mx-auto absolute top-10 left-1/2 transform -translate-x-1/2 hidden">
+                    </div>
+                    <div class="relative h-28" dir="rtl">
+                        <p class="font-black text-[#111315] mb-1" id="pdf-sign2-title">المدير العام</p>
+                        <p class="text-slate-600 mb-2 font-bold" id="pdf-sign2-name"></p>
+                        <img id="pdf-sign2-img" src="" class="h-12 mx-auto absolute top-10 left-1/2 transform -translate-x-1/2 hidden">
+                        <img id="pdf-stamp-img" src="" class="h-20 mx-auto absolute top-2 left-4 opacity-70 hidden mix-blend-multiply">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto h-[40px] bg-[#111315] text-white flex justify-between items-center px-10 text-[10px]">
+                <span id="pdf-comp-address">القصيم - بريدة</span>
+                <span dir="ltr">info@company.com | www.company.com</span>
+                <span>س.ت: <span id="pdf-comp-cr">11131326799</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-container" class="hidden">
+        <div id="report-content" class="a4-print-box flex flex-col p-10 font-sans bg-white text-right" dir="rtl">
+            <h1 class="text-3xl font-black text-center mb-6 text-slate-900">شهادة إتمام الإلحاق الوظيفي</h1>
+            <div class="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-center">
+                <div>
+                    <p class="text-2xl font-black" id="rep-name"></p>
+                    <p class="text-slate-600 font-bold" id="rep-job"></p>
+                </div>
+                <div id="qrcode-box" class="p-2 bg-white border border-slate-300 rounded-xl shadow-sm"></div>
+            </div>
+            <h2 class="text-lg font-bold mb-4 bg-slate-100 p-3 rounded-xl">سجل اكتمال المهام:</h2>
+            <div id="rep-tasks" class="space-y-2 text-base font-semibold"></div>
+            <div class="mt-auto pt-10 text-center text-slate-500 border-t border-slate-200">
+                <p class="font-bold text-slate-800">تم اعتماد واكتمال جميع إجراءات الإلحاق بنسبة 100%.</p>
+                <p class="text-xs text-slate-400">منصة إدارة الإلحاق السحابية</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Catch iframe unhandled rejections securely without breaking the app
+        window.addEventListener('unhandledrejection', function(event) {
+            event.preventDefault();
+            return true;
+        });
+
+        // Safe Toast function
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-600' : type === 'warning' ? 'bg-amber-600' : 'bg-[#111315]';
+            const icon = type === 'error' ? 'fa-exclamation-circle text-red-400' : type === 'warning' ? 'fa-exclamation-triangle text-amber-400' : 'fa-check-circle text-[#c5f82a]';
+            
+            toast.className = `toast-notification pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl text-white font-bold text-xs shadow-2xl border border-white/10 ${bgColor}`;
+            toast.innerHTML = `<i class="fas ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        };
+
+        // State Initialization (Safeguarded against syntax errors with explicit semicolons)
+        let employees = JSON.parse(localStorage.getItem('hr_employees_v3')) || [];
+        let companies = JSON.parse(localStorage.getItem('hr_companies_v3')) || [{
+            id: 'default',
+            nameAr: 'شركة قيم للتعلم', 
+            nameEn: 'QYEM Company', 
+            cr: '11131326799', 
+            address: 'القصيم - بريدة',
+            logoBase64: '', 
+            stampBase64: '', 
+            sign1Base64: '', sign1Name: '', sign1Title: 'الموارد البشرية',
+            sign2Base64: '', sign2Name: '', sign2Title: 'المدير العام'
+        }];
+        let selectedCompanyId = localStorage.getItem('hr_selected_company_v3') || 'default';
+        let selectedEmployeeId = null;
+        let selectedStageForTasks = null;
+        let isEditMode = false;
+        
+        const stagesData = [
+            { id: 1, title: 'العرض', tasks: ['توقيع العرض المبدئي', 'رفع الهوية', 'رفع المؤهل'] },
+            { id: 2, title: 'التعاقد', tasks: ['إنشاء العقد', 'توقيع العقد الإلكتروني', 'اعتماد العقد'] },
+            { id: 3, title: 'التجهيز', tasks: ['تجهيز الإيميل', 'تجهيز المكتب', 'الآيبان البنكي'] },
+            { id: 4, title: 'المباشرة', tasks: ['استقبال الموظف', 'تسليم العهدة', 'توقيع المباشرة'] },
+            { id: 5, title: 'الاعتماد', tasks: ['تحديث التأمينات', 'رفع العنوان الوطني', 'إغلاق الملف'] }
+        ];
+
+        // Ensure data migration if old format exists
+        if (!Array.isArray(companies)) {
+            const oldSettings = JSON.parse(localStorage.getItem('hr_company_settings_v3'));
+            companies = [{
+                id: 'default',
+                nameAr: oldSettings?.nameAr || 'شركة قيم للتعلم',
+                nameEn: oldSettings?.nameEn || 'QYEM Company',
+                cr: oldSettings?.cr || '',
+                address: oldSettings?.address || '',
+                logoBase64: oldSettings?.logoBase64 || '',
+                stampBase64: oldSettings?.stampBase64 || '',
+                sign1Base64: oldSettings?.signBase64 || '', sign1Name: '', sign1Title: 'الموارد البشرية',
+                sign2Base64: '', sign2Name: '', sign2Title: 'المدير العام'
+            }];
+            localStorage.setItem('hr_companies_v3', JSON.stringify(companies));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isPortalMode = urlParams.get('portal') === 'true';
+            
+            if (isPortalMode) {
+                const hrLayout = document.getElementById('hr-layout');
+                const portalView = document.getElementById('portal-view');
+                if (hrLayout) hrLayout.classList.add('hidden');
+                if (portalView) portalView.classList.remove('hidden');
+            } else {
+                window.loadCompanySettingsToUI();
+                renderTable();
+                renderStats();
+            }
+            
+            setupImageUpload('comp-logo', 'prev-logo', 'logoBase64');
+            setupImageUpload('comp-stamp', 'prev-stamp', 'stampBase64');
+            setupImageUpload('comp-sign1', 'prev-sign1', 'sign1Base64');
+            setupImageUpload('comp-sign2', 'prev-sign2', 'sign2Base64');
+        });
+
+        function setupImageUpload(inputId, imgId, settingKey) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        const img = document.getElementById(imgId);
+                        if (img) {
+                            img.src = evt.target.result;
+                            img.classList.remove('hidden');
+                        }
+                        const currentComp = companies.find(c => c.id === selectedCompanyId);
+                        if(currentComp) {
+                            currentComp[settingKey] = evt.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        window.switchView = function(viewName) {
+            ['view-dashboard', 'view-reports', 'view-settings'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            ['btn-dashboard', 'btn-reports', 'btn-settings'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.className = "w-full flex items-center gap-3 px-4 py-3 rounded-full hover:bg-slate-800 text-slate-300 font-bold transition-all view-btn";
+            });
+
+            const targetView = document.getElementById(`view-${viewName}`);
+            const targetBtn = document.getElementById(`btn-${viewName}`);
+
+            if (targetView) targetView.classList.remove('hidden');
+            if (targetBtn) targetBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-full bg-[#c5f82a] text-black font-extrabold transition-all shadow-md view-btn";
+        };
+
+        window.renderCompanySwitcher = function() {
+            const switcher = document.getElementById('company-switcher');
+            if(!switcher) return;
+            switcher.innerHTML = '';
+            companies.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = c.nameAr || 'بدون اسم';
+                if (c.id === selectedCompanyId) opt.selected = true;
+                switcher.appendChild(opt);
+            });
+        };
+
+        window.changeCompany = function(id) {
+            selectedCompanyId = id;
+            localStorage.setItem('hr_selected_company_v3', id);
+            window.loadCompanySettingsToUI();
+            window.showToast('تم التبديل إلى المنشأة الجديدة!');
+        };
+
+        window.addNewCompany = function() {
+            const newId = 'comp_' + Date.now();
+            companies.push({
+                id: newId,
+                nameAr: 'المنشأة الجديدة',
+                nameEn: 'New Company',
+                cr: '', address: '',
+                logoBase64: '', stampBase64: '',
+                sign1Base64: '', sign1Name: '', sign1Title: 'الموارد البشرية',
+                sign2Base64: '', sign2Name: '', sign2Title: 'المدير العام'
+            });
+            selectedCompanyId = newId;
+            localStorage.setItem('hr_selected_company_v3', newId);
+            localStorage.setItem('hr_companies_v3', JSON.stringify(companies));
+            
+            window.loadCompanySettingsToUI();
+            window.showToast('تم إضافة المنشأة. يرجى تعديل بياناتها.');
+        };
+
+        window.loadCompanySettingsToUI = function() {
+            const currentComp = companies.find(c => c.id === selectedCompanyId) || companies[0];
+            
+            if (document.getElementById('comp-name-ar')) document.getElementById('comp-name-ar').value = currentComp.nameAr || '';
+            if (document.getElementById('comp-name-en')) document.getElementById('comp-name-en').value = currentComp.nameEn || '';
+            if (document.getElementById('comp-cr')) document.getElementById('comp-cr').value = currentComp.cr || '';
+            if (document.getElementById('comp-address')) document.getElementById('comp-address').value = currentComp.address || '';
+            
+            if (document.getElementById('comp-sign1-title')) document.getElementById('comp-sign1-title').value = currentComp.sign1Title || '';
+            if (document.getElementById('comp-sign1-name')) document.getElementById('comp-sign1-name').value = currentComp.sign1Name || '';
+            if (document.getElementById('comp-sign2-title')) document.getElementById('comp-sign2-title').value = currentComp.sign2Title || '';
+            if (document.getElementById('comp-sign2-name')) document.getElementById('comp-sign2-name').value = currentComp.sign2Name || '';
+            
+            const sidebarName = document.getElementById('sidebar-company-name');
+            const statCompany = document.getElementById('stat-company');
+            if (sidebarName) sidebarName.innerText = currentComp.nameAr || 'المنشأة';
+            if (statCompany) statCompany.innerText = currentComp.nameAr || 'المنشأة';
+            
+            const logoImg = document.getElementById('sidebar-company-logo-img');
+            const logoIcon = document.getElementById('sidebar-company-logo-icon');
+            if (currentComp.logoBase64) {
+                if (logoImg) { logoImg.src = currentComp.logoBase64; logoImg.classList.remove('hidden'); }
+                if (logoIcon) logoIcon.classList.add('hidden');
+            } else {
+                if (logoImg) logoImg.classList.add('hidden');
+                if (logoIcon) logoIcon.classList.remove('hidden');
+            }
+
+            ['logo', 'stamp', 'sign1', 'sign2'].forEach(key => {
+                const imgEl = document.getElementById('prev-' + key);
+                if (imgEl) {
+                    if (currentComp[key + 'Base64']) {
+                        imgEl.src = currentComp[key + 'Base64'];
+                        imgEl.classList.remove('hidden');
+                    } else {
+                        imgEl.classList.add('hidden');
+                    }
+                }
+            });
+
+            window.renderCompanySwitcher();
+        };
+
+        window.saveCompanySettings = function() {
+            const currentComp = companies.find(c => c.id === selectedCompanyId);
+            if (!currentComp) return;
+
+            currentComp.nameAr = document.getElementById('comp-name-ar')?.value || '';
+            currentComp.nameEn = document.getElementById('comp-name-en')?.value || '';
+            currentComp.cr = document.getElementById('comp-cr')?.value || '';
+            currentComp.address = document.getElementById('comp-address')?.value || '';
+            
+            currentComp.sign1Title = document.getElementById('comp-sign1-title')?.value || '';
+            currentComp.sign1Name = document.getElementById('comp-sign1-name')?.value || '';
+            currentComp.sign2Title = document.getElementById('comp-sign2-title')?.value || '';
+            currentComp.sign2Name = document.getElementById('comp-sign2-name')?.value || '';
+            
+            localStorage.setItem('hr_companies_v3', JSON.stringify(companies));
+            window.loadCompanySettingsToUI();
+            window.showToast('تم حفظ إعدادات المنشأة واعتمادها!');
+        };
+
+        window.openAddModal = function() {
+            isEditMode = false;
+            const modal = document.getElementById('add-modal');
+            const form = document.getElementById('add-form');
+            if (document.getElementById('modal-title-text')) document.getElementById('modal-title-text').innerText = 'إضافة موظف جديد';
+            if (modal) modal.classList.remove('hidden');
+            if (form) form.reset();
+            if (document.getElementById('emp-gosi-deduction')) document.getElementById('emp-gosi-deduction').value = '';
+        };
+
+        window.closeAddModal = function() {
+            const modal = document.getElementById('add-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+        
+        window.editEmployee = function() {
+            if (!selectedEmployeeId) return;
+            isEditMode = true;
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            if (!emp) return;
+
+            window.closeDetailsModal();
+            window.openAddModal();
+            
+            if (document.getElementById('modal-title-text')) document.getElementById('modal-title-text').innerText = 'تعديل بيانات الموظف';
+            
+            if(document.getElementById('emp-nid')) document.getElementById('emp-nid').value = emp.nid;
+            if(document.getElementById('emp-nationality')) document.getElementById('emp-nationality').value = emp.nationality;
+            if(document.getElementById('emp-name')) document.getElementById('emp-name').value = emp.name;
+            if(document.getElementById('emp-job')) document.getElementById('emp-job').value = emp.jobTitle;
+            if(document.getElementById('emp-date')) document.getElementById('emp-date').value = emp.startDate;
+            if(document.getElementById('emp-contract-duration')) document.getElementById('emp-contract-duration').value = emp.contractDuration;
+            
+            if (emp.financials) {
+                if(document.getElementById('emp-total-salary')) document.getElementById('emp-total-salary').value = emp.financials.total;
+                if(document.getElementById('emp-basic')) document.getElementById('emp-basic').value = emp.financials.basic;
+                if(document.getElementById('emp-housing')) document.getElementById('emp-housing').value = emp.financials.housing;
+                if(document.getElementById('emp-transport')) document.getElementById('emp-transport').value = emp.financials.transport;
+                if(document.getElementById('emp-gosi-deduction')) document.getElementById('emp-gosi-deduction').value = emp.financials.gosi;
+                if(document.getElementById('gosi-new-system')) document.getElementById('gosi-new-system').checked = emp.financials.isNewGosi;
+            }
+        };
+
+        window.deleteEmployee = function() {
+            if (!selectedEmployeeId) return;
+            if(confirm('هل أنت متأكد من حذف الموظف نهائياً؟')) {
+                employees = employees.filter(e => e.id !== selectedEmployeeId);
+                saveData();
+                renderTable();
+                renderStats();
+                window.closeDetailsModal();
+                window.showToast('تم حذف الموظف بنجاح', 'warning');
+            }
+        };
+
+        document.getElementById('add-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nid = document.getElementById('emp-nid')?.value || '';
+            if(nid.length !== 10) { 
+                window.showToast('رقم الهوية يجب أن يكون 10 أرقام', 'error'); 
+                return; 
+            }
+
+            const updatedData = {
+                nid: nid,
+                name: document.getElementById('emp-name')?.value || '',
+                nationality: document.getElementById('emp-nationality')?.value || '',
+                jobTitle: document.getElementById('emp-job')?.value || '',
+                startDate: document.getElementById('emp-date')?.value || '',
+                contractDuration: document.getElementById('emp-contract-duration')?.value || 'سنة واحدة',
+                financials: {
+                    total: document.getElementById('emp-total-salary')?.value || '0',
+                    basic: document.getElementById('emp-basic')?.value || '0',
+                    housing: document.getElementById('emp-housing')?.value || '0',
+                    transport: document.getElementById('emp-transport')?.value || '0',
+                    gosi: document.getElementById('emp-gosi-deduction')?.value || '0',
+                    isNewGosi: document.getElementById('gosi-new-system')?.checked || false
+                }
+            };
+
+            if (isEditMode && selectedEmployeeId) {
+                const idx = employees.findIndex(e => e.id === selectedEmployeeId);
+                if (idx > -1) {
+                    employees[idx] = { ...employees[idx], ...updatedData };
+                }
+                window.showToast('تم تعديل بيانات الموظف بنجاح!');
+            } else {
+                updatedData.id = nid + '_' + Date.now();
+                updatedData.currentStage = 1;
+                updatedData.progress = 20;
+                updatedData.completedTasks = [];
+                updatedData.createdAt = new Date().toISOString();
+                employees.push(updatedData);
+                window.showToast('تمت إضافة الموظف بنجاح!');
+            }
+
+            saveData();
+            renderTable();
+            renderStats();
+            window.closeAddModal();
+            if (isEditMode) {
+                window.openEmployeeDetails(selectedEmployeeId);
+            }
+        });
+
+        window.detectNationality = function() {
+            const nidInput = document.getElementById('emp-nid');
+            const natSelect = document.getElementById('emp-nationality');
+            if (nidInput && natSelect && nidInput.value.startsWith('1')) {
+                natSelect.value = "سعودي";
+            }
+        };
+
+        window.calculateSalaryStructure = function(totalSalary, isNewGosi = false) {
+            const basic = Number((totalSalary * (3704 / 5000)).toFixed(2));
+            const housing = Number((totalSalary * (926 / 5000)).toFixed(2));
+            const transport = Number((totalSalary * (370 / 5000)).toFixed(2));
+            
+            const gosiSalary = basic + housing;
+            const employeeRate = isNewGosi ? 0.1075 : 0.0975; 
+            const employeeGosi = Number((gosiSalary * employeeRate).toFixed(2));
+            const netSalary = Number((totalSalary - employeeGosi).toFixed(2));
+            
+            return { basic, housing, transport, employeeGosi, netSalary };
+        };
+
+        window.distributeSalary = function(val) {
+            const total = parseFloat(val);
+            if (!total || total <= 0) return;
+            const isNewGosi = document.getElementById('gosi-new-system')?.checked || false;
+            const s = window.calculateSalaryStructure(total, isNewGosi);
+            
+            if (document.getElementById('emp-basic')) document.getElementById('emp-basic').value = s.basic;
+            if (document.getElementById('emp-housing')) document.getElementById('emp-housing').value = s.housing;
+            if (document.getElementById('emp-transport')) document.getElementById('emp-transport').value = s.transport;
+            if (document.getElementById('emp-gosi-deduction')) document.getElementById('emp-gosi-deduction').value = s.employeeGosi;
+        };
+
+        window.reverseCalculate = function() {
+            const b = parseFloat(document.getElementById('emp-basic')?.value) || 0;
+            const h = parseFloat(document.getElementById('emp-housing')?.value) || 0;
+            const t = parseFloat(document.getElementById('emp-transport')?.value) || 0;
+            
+            const total = b + h + t;
+            if (document.getElementById('emp-total-salary')) document.getElementById('emp-total-salary').value = total;
+            
+            const isNewGosi = document.getElementById('gosi-new-system')?.checked || false;
+            const gosiSalary = b + h;
+            const employeeRate = isNewGosi ? 0.1075 : 0.0975; 
+            if (document.getElementById('emp-gosi-deduction')) {
+                document.getElementById('emp-gosi-deduction').value = (gosiSalary * employeeRate).toFixed(2);
+            }
+        };
+
+        window.triggerSalaryRecalc = function() {
+            const total = parseFloat(document.getElementById('emp-total-salary')?.value);
+            if (total) window.distributeSalary(total);
+        };
+
+        function saveData() {
+            localStorage.setItem('hr_employees_v3', JSON.stringify(employees));
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('employees-table');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            employees.forEach(emp => {
+                let badgeStyle = 'text-black bg-[#c5f82a]';
+                if(emp.progress === 100) badgeStyle = 'text-emerald-900 bg-emerald-300';
+                else if(emp.progress > 50) badgeStyle = 'text-amber-900 bg-amber-200';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100';
+                tr.onclick = (e) => {
+                    if(!e.target.closest('button')) window.openEmployeeDetails(emp.id);
+                };
+                
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-900 text-[#c5f82a] flex items-center justify-center font-black">
+                                ${emp.name ? emp.name.charAt(0) : 'م'}
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-slate-900 text-sm">${emp.name}</div>
+                                <div class="text-xs text-slate-500 font-bold">${emp.jobTitle}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4 text-slate-600 font-mono font-bold text-xs">${emp.nid}</td>
+                    <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-black ${badgeStyle}">المرحلة ${emp.currentStage}</span></td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="h-2 rounded-full timeline-gradient" style="width: ${emp.progress}%"></div>
+                            </div>
+                            <span class="text-xs font-black text-slate-800 w-8">${emp.progress}%</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="event.stopPropagation(); window.openEmployeeDetails('${emp.id}')" class="text-xs font-extrabold text-black hover:text-slate-700 px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full">إدارة <i class="fas fa-chevron-left text-[10px] ml-1"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderStats() {
+            if(document.getElementById('stat-total')) document.getElementById('stat-total').innerText = employees.length;
+            if(document.getElementById('stat-completed')) document.getElementById('stat-completed').innerText = employees.filter(e => e.progress === 100).length;
+            if(document.getElementById('stat-progress')) document.getElementById('stat-progress').innerText = employees.filter(e => e.progress < 100).length;
+        }
+
+        window.openEmployeeDetails = function(id) {
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            selectedEmployeeId = id;
+
+            if (document.getElementById('d-name')) document.getElementById('d-name').innerText = emp.name;
+            if (document.getElementById('d-job')) document.getElementById('d-job').innerText = emp.jobTitle;
+            if (document.getElementById('d-avatar')) document.getElementById('d-avatar').innerText = emp.name ? emp.name.charAt(0) : 'م';
+            
+            if(document.getElementById('d-total')) document.getElementById('d-total').innerText = (emp.financials?.total || '0') + ' ﷼';
+            if(document.getElementById('d-basic')) document.getElementById('d-basic').innerText = (emp.financials?.basic || '0') + ' ﷼';
+            if(document.getElementById('d-housing')) document.getElementById('d-housing').innerText = (emp.financials?.housing || '0') + ' ﷼';
+            if(document.getElementById('d-transport')) document.getElementById('d-transport').innerText = (emp.financials?.transport || '0') + ' ﷼';
+            
+            const gosi = parseFloat(emp.financials?.gosi || 0);
+            const net = parseFloat(emp.financials?.total || 0) - gosi;
+            if(document.getElementById('d-gosi')) document.getElementById('d-gosi').innerText = gosi + ' ﷼';
+            if(document.getElementById('d-net')) document.getElementById('d-net').innerText = net + ' ﷼';
+
+            if(document.getElementById('d-nid')) document.getElementById('d-nid').innerText = emp.nid;
+            if(document.getElementById('d-nationality')) document.getElementById('d-nationality').innerText = emp.nationality;
+            if(document.getElementById('d-iban')) document.getElementById('d-iban').innerText = emp.iban || 'لم يُسجل';
+            if(document.getElementById('d-address')) document.getElementById('d-address').innerText = emp.address || 'لم يُسجل';
+            if(document.getElementById('d-emergency')) document.getElementById('d-emergency').innerText = emp.emergencyContact ? `${emp.emergencyContact.name} (${emp.emergencyContact.phone})` : 'لم يُسجل';
+            if(document.getElementById('d-files')) document.getElementById('d-files').innerText = emp.filesUploaded ? 'تم الرفع ✅' : 'قيد الانتظار ⏳';
+
+            renderTimelineNodes(emp);
+            renderChecklist(emp);
+
+            const printBtn = document.getElementById('btn-print-report');
+            if(printBtn) {
+                if(emp.progress === 100) printBtn.classList.remove('hidden');
+                else printBtn.classList.add('hidden');
+            }
+
+            const linkArea = document.getElementById('link-area');
+            if(linkArea) linkArea.classList.add('hidden');
+            
+            const modal = document.getElementById('details-modal');
+            if(modal) modal.classList.remove('hidden');
+        };
+
+        window.closeDetailsModal = function() {
+            const modal = document.getElementById('details-modal');
+            if (modal) modal.classList.add('hidden');
+            selectedEmployeeId = null;
+        };
+
+        function renderTimelineNodes(emp) {
+            const container = document.getElementById('timeline-nodes-container');
+            const bar = document.getElementById('d-timeline-bar');
+            const progressText = document.getElementById('d-progress-text');
+            
+            if (progressText) progressText.innerText = `${emp.progress}% مكتمل`;
+            
+            if(bar) {
+                if(emp.progress === 100) {
+                    bar.style.background = '#10b981';
+                    if (progressText) progressText.className = "px-4 py-1.5 bg-emerald-100 text-emerald-900 font-extrabold rounded-full text-xs";
+                } else {
+                    bar.style.background = 'linear-gradient(to left, #c5f82a 0%, #10b981 100%)';
+                    if (progressText) progressText.className = "px-4 py-1.5 bg-slate-100 text-slate-800 font-extrabold rounded-full text-xs";
+                }
+                bar.style.width = `${emp.progress}%`;
+            }
+            if (!container) return;
+            container.innerHTML = '';
+
+            stagesData.forEach(stage => {
+                const isPassed = stage.id <= emp.currentStage;
+                const isCurrent = stage.id === emp.currentStage;
+                
+                let circleClass = "w-9 h-9 rounded-full border-2 flex items-center justify-center font-extrabold bg-white text-slate-400 border-slate-300 cursor-pointer hover:border-black transition-colors z-10 shadow-sm text-xs";
+                
+                if (isPassed && emp.progress === 100) circleClass = "w-9 h-9 rounded-full bg-emerald-500 text-white font-extrabold flex items-center justify-center shadow-md z-10 cursor-pointer text-xs";
+                else if (isPassed && !isCurrent) circleClass = "w-9 h-9 rounded-full bg-black text-[#c5f82a] font-extrabold flex items-center justify-center shadow-md z-10 cursor-pointer text-xs";
+                else if (isCurrent) circleClass = "w-9 h-9 rounded-full border-4 border-[#c5f82a] bg-black text-[#c5f82a] font-extrabold flex items-center justify-center shadow-lg z-10 cursor-pointer animate-pulse text-xs";
+
+                const node = document.createElement('div');
+                node.className = 'flex flex-col items-center';
+                node.innerHTML = `
+                    <div class="${circleClass}" onclick="window.openTasksModal(${stage.id})">${stage.id}</div>
+                    <div class="text-[11px] font-black mt-2 ${isPassed ? (emp.progress===100?'text-emerald-700':'text-slate-900') : 'text-slate-400'}">${stage.title}</div>
+                `;
+                container.appendChild(node);
+            });
+        }
+
+        window.openTasksModal = function(stageId) {
+            selectedStageForTasks = stageId;
+            const stage = stagesData.find(s => s.id === stageId);
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            const completed = emp ? (emp.completedTasks || []) : [];
+            
+            const titleEl = document.getElementById('tm-title');
+            if (titleEl && stage) titleEl.innerText = `مهام المرحلة ${stageId}: ${stage.title}`;
+            
+            const list = document.getElementById('tm-list');
+            if (!list || !stage) return;
+            list.innerHTML = '';
+            
+            stage.tasks.forEach(task => {
+                const isChecked = completed.includes(task) ? 'checked' : '';
+                list.innerHTML += `
+                    <label class="flex items-center gap-3 p-3 border border-slate-200 rounded-2xl hover:bg-slate-50 cursor-pointer font-bold text-xs text-slate-700">
+                        <input type="checkbox" value="${task}" class="task-checkbox w-5 h-5 text-black rounded focus:ring-black" ${isChecked}>
+                        <span>${task}</span>
+                    </label>
+                `;
+            });
+            
+            const tasksModal = document.getElementById('tasks-modal');
+            if (tasksModal) tasksModal.classList.remove('hidden');
+        };
+
+        window.saveTasksProgress = function() {
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            if (!emp) return;
+            if (!emp.completedTasks) emp.completedTasks = [];
+            
+            const checkboxes = document.querySelectorAll('.task-checkbox');
+            checkboxes.forEach(cb => {
+                if (cb.checked && !emp.completedTasks.includes(cb.value)) emp.completedTasks.push(cb.value);
+                if (!cb.checked && emp.completedTasks.includes(cb.value)) {
+                    emp.completedTasks = emp.completedTasks.filter(t => t !== cb.value);
+                }
+            });
+
+            const totalTasks = 15; 
+            const completedCount = emp.completedTasks.length;
+            let newProgress = Math.round((completedCount / totalTasks) * 100);
+            if (newProgress < 20) newProgress = 20;
+            
+            if(completedCount >= 15) emp.currentStage = 5;
+            else if(completedCount >= 12) emp.currentStage = 4;
+            else if(completedCount >= 9) emp.currentStage = 3;
+            else if(completedCount >= 6) emp.currentStage = 2;
+            else emp.currentStage = 1;
+            
+            emp.progress = newProgress;
+            
+            saveData();
+            renderTable();
+            renderStats();
+            window.openEmployeeDetails(emp.id);
+            window.closeTasksModal();
+            window.showToast('تم تحديث تقدم المرحلة بنجاح!');
+        };
+
+        window.closeTasksModal = function() {
+            const modal = document.getElementById('tasks-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        function renderChecklist(emp) {
+            const container = document.getElementById('d-checklist-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const completed = emp.completedTasks || [];
+            
+            stagesData.forEach(stage => {
+                let listHtml = `<div class="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl"><div class="font-black text-slate-800 text-xs mb-2">${stage.title}</div><ul class="space-y-1.5 text-xs font-semibold">`;
+                stage.tasks.forEach(task => {
+                    const done = completed.includes(task);
+                    listHtml += `<li class="${done ? 'text-emerald-700 font-extrabold' : 'text-slate-400'}"><i class="fas ${done ? 'fa-check-circle text-emerald-500' : 'fa-hourglass-half'} ml-1.5"></i> ${task}</li>`;
+                });
+                listHtml += `</ul></div>`;
+                container.innerHTML += listHtml;
+            });
+        }
+
+        window.generateOfferPDF = function() {
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            const comp = companies.find(c => c.id === selectedCompanyId) || companies[0];
+            if (!emp || !comp) return;
+
+            if (document.getElementById('pdf-comp-name-ar')) document.getElementById('pdf-comp-name-ar').innerText = comp.nameAr;
+            if (document.getElementById('pdf-comp-name-en')) document.getElementById('pdf-comp-name-en').innerText = comp.nameEn;
+            if (document.getElementById('pdf-comp-cr')) document.getElementById('pdf-comp-cr').innerText = comp.cr;
+            if (document.getElementById('pdf-comp-address')) document.getElementById('pdf-comp-address').innerText = comp.address;
+            
+            const logo = document.getElementById('pdf-logo-img');
+            if (logo) {
+                if (comp.logoBase64) { logo.src = comp.logoBase64; logo.classList.remove('hidden'); }
+                else logo.classList.add('hidden');
+            }
+            
+            const stamp = document.getElementById('pdf-stamp-img');
+            if (stamp) {
+                if (comp.stampBase64) { stamp.src = comp.stampBase64; stamp.classList.remove('hidden'); }
+                else stamp.classList.add('hidden');
+            }
+            
+            // Sign 1 details
+            if (document.getElementById('pdf-sign1-title')) document.getElementById('pdf-sign1-title').innerText = comp.sign1Title || 'الموارد البشرية';
+            if (document.getElementById('pdf-sign1-name')) document.getElementById('pdf-sign1-name').innerText = comp.sign1Name || '';
+            const sign1 = document.getElementById('pdf-sign1-img');
+            if (sign1) {
+                if (comp.sign1Base64) { sign1.src = comp.sign1Base64; sign1.classList.remove('hidden'); }
+                else sign1.classList.add('hidden');
+            }
+
+            // Sign 2 details
+            if (document.getElementById('pdf-sign2-title')) document.getElementById('pdf-sign2-title').innerText = comp.sign2Title || 'المدير العام';
+            if (document.getElementById('pdf-sign2-name')) document.getElementById('pdf-sign2-name').innerText = comp.sign2Name || '';
+            const sign2 = document.getElementById('pdf-sign2-img');
+            if (sign2) {
+                if (comp.sign2Base64) { sign2.src = comp.sign2Base64; sign2.classList.remove('hidden'); }
+                else sign2.classList.add('hidden');
+            }
+
+            if (document.getElementById('pdf-name')) document.getElementById('pdf-name').innerText = emp.name;
+            if (document.getElementById('pdf-nationality')) document.getElementById('pdf-nationality').innerText = emp.nationality;
+            if (document.getElementById('pdf-job')) document.getElementById('pdf-job').innerText = emp.jobTitle;
+            if (document.getElementById('pdf-duration')) document.getElementById('pdf-duration').innerText = emp.contractDuration;
+            if (document.getElementById('pdf-date')) document.getElementById('pdf-date').innerText = emp.startDate;
+            
+            if (document.getElementById('pdf-basic')) document.getElementById('pdf-basic').innerText = emp.financials.basic;
+            if (document.getElementById('pdf-housing')) document.getElementById('pdf-housing').innerText = emp.financials.housing;
+            if (document.getElementById('pdf-transport')) document.getElementById('pdf-transport').innerText = emp.financials.transport;
+            if (document.getElementById('pdf-total')) document.getElementById('pdf-total').innerText = emp.financials.total;
+
+            const element = document.getElementById('pdf-content');
+            const pdfContainer = document.getElementById('pdf-container');
+            if (pdfContainer) pdfContainer.classList.remove('hidden');
+
+            const opt = {
+                margin: 0,
+                filename: `Offer_${emp.name}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (pdfContainer) pdfContainer.classList.add('hidden');
+                    window.showToast('تم تحميل العرض الوظيفي بنجاح!');
+                });
+            } catch(e) {
+                if (pdfContainer) pdfContainer.classList.add('hidden');
+            }
+        };
+
+        window.printCompletionReport = function() {
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            if (!emp) return;
+
+            if (document.getElementById('rep-name')) document.getElementById('rep-name').innerText = emp.name;
+            if (document.getElementById('rep-job')) document.getElementById('rep-job').innerText = emp.jobTitle;
+            
+            const tasksDiv = document.getElementById('rep-tasks');
+            if (tasksDiv) {
+                tasksDiv.innerHTML = '';
+                (emp.completedTasks || []).forEach(t => {
+                    tasksDiv.innerHTML += `<div class="flex items-center gap-2 border-b py-2 text-slate-800"><i class="fas fa-check-circle text-emerald-500"></i> ${t}</div>`;
+                });
+            }
+
+            const qrBox = document.getElementById('qrcode-box');
+            if (qrBox) {
+                qrBox.innerHTML = '';
+                new QRCode(qrBox, {
+                    text: window.location.href,
+                    width: 80,
+                    height: 80
+                });
+            }
+
+            const element = document.getElementById('report-content');
+            const repContainer = document.getElementById('report-container');
+            if (repContainer) repContainer.classList.remove('hidden');
+            
+            const opt = {
+                margin: 10,
+                filename: `Completion_${emp.name}.pdf`,
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (repContainer) repContainer.classList.add('hidden');
+                    window.showToast('تم تحميل تقرير الاكتمال بنجاح!');
+                });
+            } catch(e) {
+                if (repContainer) repContainer.classList.add('hidden');
+            }
+        };
+
+        window.exportToExcel = function() {
+            const data = employees.map(e => ({
+                'رقم الهوية': e.nid,
+                'الاسم': e.name,
+                'الجنسية': e.nationality,
+                'الوظيفة': e.jobTitle,
+                'إجمالي الراتب': e.financials?.total || 0,
+                'الأساسي': e.financials?.basic || 0,
+                'السكن': e.financials?.housing || 0,
+                'النقل': e.financials?.transport || 0,
+                'التأمينات': e.financials?.gosi || 0,
+                'نسبة الاكتمال': e.progress + '%',
+                'الآيبان': e.iban || '',
+                'العنوان': e.address || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "الموظفين");
+            XLSX.writeFile(wb, "HR_Employees.xlsx");
+            window.showToast('تم تصدير ملف الإكسل بنجاح!');
+        };
+
+        window.generatePortalLink = function() {
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            if (!emp) return;
+            const baseUrl = window.location.href.split('?')[0];
+            const portalUrl = `${baseUrl}?portal=true&empId=${emp.id}`;
+            const input = document.getElementById('portal-link-input');
+            const area = document.getElementById('link-area');
+            if (input) input.value = portalUrl;
+            if (area) area.classList.remove('hidden');
+        };
+
+        window.copyPortalLink = function() {
+            const input = document.getElementById('portal-link-input');
+            if (!input) return;
+            input.select();
+            document.execCommand('copy');
+            window.showToast('تم نسخ رابط البوابة بنجاح!');
+        };
+
+        window.previewPortal = function() {
+            const emp = employees.find(e => e.id === selectedEmployeeId);
+            if (!emp) return;
+            
+            const hrLayout = document.getElementById('hr-layout');
+            const detailsModal = document.getElementById('details-modal');
+            const portalView = document.getElementById('portal-view');
+            const portalWelcome = document.getElementById('portal-welcome');
+
+            if (hrLayout) hrLayout.classList.add('hidden');
+            if (detailsModal) detailsModal.classList.add('hidden');
+            if (portalView) portalView.classList.remove('hidden');
+            if (portalWelcome) portalWelcome.innerText = `أهلاً بك، ${emp.name}`;
+            
+            if(!document.getElementById('btn-back-hr')) {
+                const btn = document.createElement('button');
+                btn.id = 'btn-back-hr';
+                btn.className = "fixed top-4 right-4 bg-[#111315] text-[#c5f82a] px-5 py-2.5 rounded-full z-50 font-extrabold shadow-2xl text-xs flex items-center gap-2 hover:bg-black transition-all";
+                btn.innerHTML = '<i class="fas fa-arrow-right"></i> العودة للموارد البشرية';
+                btn.onclick = () => {
+                    if (portalView) portalView.classList.add('hidden');
+                    if (hrLayout) hrLayout.classList.remove('hidden');
+                    window.openEmployeeDetails(emp.id);
+                    btn.remove();
+                };
+                document.body.appendChild(btn);
+            }
+        };
+
+        ['p-file-id', 'p-file-cert'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', function() {
+                const display = this.parentElement.querySelector('.p-file-name-display');
+                if (this.files.length > 0 && display) {
+                    display.innerText = "تم إرفاق: " + this.files[0].name;
+                    display.classList.replace('text-slate-500', 'text-emerald-700');
+                    this.parentElement.classList.replace('border-slate-300', 'border-emerald-400');
+                    this.parentElement.classList.add('bg-emerald-50');
+                }
+            });
+        });
+
+        document.getElementById('portal-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formContainer = document.getElementById('portal-form-container');
+            const portalSuccess = document.getElementById('portal-success');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const empId = urlParams.get('empId') || selectedEmployeeId;
+            const emp = employees.find(e => e.id === empId);
+
+            if (emp) {
+                emp.iban = document.getElementById('p-iban')?.value || '';
+                emp.address = document.getElementById('p-address')?.value || '';
+                emp.emergencyContact = {
+                    name: document.getElementById('p-contact-name')?.value || '',
+                    phone: document.getElementById('p-contact-phone')?.value || ''
+                };
+                emp.filesUploaded = true;
+                
+                if (!emp.completedTasks) emp.completedTasks = [];
+                const portalTasks = ['رفع الهوية', 'رفع المؤهل', 'الآيبان البنكي', 'رفع العنوان الوطني'];
+                portalTasks.forEach(t => {
+                    if (!emp.completedTasks.includes(t)) emp.completedTasks.push(t);
+                });
+                
+                const completedCount = emp.completedTasks.length;
+                let newProgress = Math.round((completedCount / 15) * 100);
+                if (newProgress < 20) newProgress = 20;
+                emp.progress = newProgress;
+
+                saveData();
+                renderTable();
+                renderStats();
+            }
+
+            if (formContainer) formContainer.classList.add('hidden');
+            if (portalSuccess) portalSuccess.classList.remove('hidden');
+            window.showToast('تم استلام بيانات الموظف بنجاح!');
+        });
+    </script>
+</body>
+</html>
