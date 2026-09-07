@@ -130,16 +130,26 @@
     </div>
 
     <div id="hr-layout" class="flex flex-col md:flex-row w-full flex-1 p-3 md:p-4 gap-4 overflow-hidden">
-        <aside id="main-sidebar" class="hidden md:flex w-full md:w-64 bg-[#111315] text-white flex-col rounded-3xl shadow-2xl p-4 justify-between border border-slate-800 shrink-0">
+        
+        <!-- Mobile Backdrop Overlay -->
+        <div id="sidebar-backdrop" onclick="window.toggleMobileSidebar()" class="hidden fixed inset-0 z-40 modal-overlay md:hidden"></div>
+
+        <aside id="main-sidebar" class="hidden md:flex w-72 md:w-64 bg-[#111315] text-white flex-col rounded-none md:rounded-3xl shadow-2xl p-4 justify-between border-r md:border border-slate-800 shrink-0 fixed md:static top-0 right-0 bottom-0 z-50 h-full md:h-auto overflow-y-auto">
             <div>
-                <div class="p-2 md:p-4 text-center border-b border-slate-800 mb-4">
+                <div class="flex justify-between items-center md:block p-2 md:p-4 text-center border-b border-slate-800 mb-4">
+                    <div></div>
                     <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/10 shadow-inner overflow-hidden">
                         <i class="fas fa-building text-2xl text-[#c5f82a]" id="sidebar-company-logo-icon"></i>
                         <img id="sidebar-company-logo-img" src="" class="hidden w-full h-full object-contain rounded-2xl">
                     </div>
+                    <button onclick="window.toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                <div class="px-2 mb-4">
                     <select id="company-selector" onchange="window.switchCompany(this.value)" class="w-full bg-slate-900 text-white border border-slate-700 rounded-xl p-1.5 text-xs font-bold mb-2 focus:outline-none">
                     </select>
-                    <p class="text-xs text-slate-400 font-semibold">منصة الإلحاق والمخالصات</p>
+                    <p class="text-xs text-slate-400 font-semibold text-center">منصة الإلحاق والمخالصات</p>
                 </div>
                 
                 <nav class="space-y-2">
@@ -1006,13 +1016,14 @@
 
         window.toggleMobileSidebar = function() {
             const sb = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
             if (!sb) return;
             if (sb.classList.contains('hidden')) {
                 sb.classList.remove('hidden');
-                sb.classList.add('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
+                if (backdrop) backdrop.classList.remove('hidden');
             } else {
-                sb.classList.remove('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
                 sb.classList.add('hidden');
+                if (backdrop) backdrop.classList.add('hidden');
             }
         };
 
@@ -1041,9 +1052,10 @@
             if (targetBtn) targetBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-full bg-[#c5f82a] text-black font-extrabold transition-all shadow-md view-btn";
 
             const sb = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
             if (sb && window.innerWidth < 768 && !sb.classList.contains('hidden')) {
-                sb.classList.remove('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
                 sb.classList.add('hidden');
+                if (backdrop) backdrop.classList.add('hidden');
             }
         };
 
