@@ -72,7 +72,7 @@
             print-color-adjust: exact;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
 
         .toast-notification {
@@ -100,7 +100,7 @@
         });
     </script>
 </head>
-<body class="h-screen flex overflow-hidden text-slate-900 bg-[#f3f4f7]">
+<body class="min-h-screen flex flex-col md:flex-row overflow-x-hidden text-slate-900 bg-[#f3f4f7] md:h-screen md:overflow-hidden">
 
     <div id="toast-container" class="fixed top-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -118,10 +118,21 @@
         </div>
     </div>
 
-    <div id="hr-layout" class="flex w-full h-full p-4 gap-4">
-        <aside class="w-64 bg-[#111315] text-white flex flex-col rounded-3xl shadow-2xl p-4 justify-between border border-slate-800">
+    <!-- Mobile Header Bar -->
+    <div class="md:hidden flex items-center justify-between bg-[#111315] text-white p-4 m-3 mb-0 rounded-2xl shadow-lg z-30">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-building text-[#c5f82a]"></i>
+            <span class="font-black text-xs">منصة الموارد البشرية</span>
+        </div>
+        <button onclick="window.toggleMobileSidebar()" class="text-[#c5f82a] text-xl focus:outline-none p-1">
+            <i class="fas fa-bars" id="mobile-menu-icon"></i>
+        </button>
+    </div>
+
+    <div id="hr-layout" class="flex flex-col md:flex-row w-full flex-1 p-3 md:p-4 gap-4 overflow-hidden">
+        <aside id="main-sidebar" class="hidden md:flex w-full md:w-64 bg-[#111315] text-white flex-col rounded-3xl shadow-2xl p-4 justify-between border border-slate-800 shrink-0">
             <div>
-                <div class="p-4 text-center border-b border-slate-800 mb-4">
+                <div class="p-2 md:p-4 text-center border-b border-slate-800 mb-4">
                     <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/10 shadow-inner overflow-hidden">
                         <i class="fas fa-building text-2xl text-[#c5f82a]" id="sidebar-company-logo-icon"></i>
                         <img id="sidebar-company-logo-img" src="" class="hidden w-full h-full object-contain rounded-2xl">
@@ -146,7 +157,7 @@
                     </button>
                 </nav>
             </div>
-            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400 mt-4 md:mt-0">
                 <div class="flex items-center justify-between mb-2">
                     <span class="font-bold text-white">حالة النظام</span>
                     <span class="w-2.5 h-2.5 rounded-full bg-[#c5f82a] animate-pulse"></span>
@@ -156,32 +167,32 @@
         </aside>
 
         <main class="flex-1 flex flex-col overflow-hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm relative">
-            <header class="p-6 pb-2 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-slate-100">
+            <header class="p-4 md:p-6 pb-3 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-slate-100">
                 <div>
                     <div class="flex items-center gap-3">
-                        <h2 class="text-3xl font-black tracking-tight text-slate-900" id="header-title">مساحة العمل</h2>
+                        <h2 class="text-2xl md:text-3xl font-black tracking-tight text-slate-900" id="header-title">مساحة العمل</h2>
                         <span class="px-3 py-1 rounded-full bg-black text-[#c5f82a] text-xs font-bold shadow-sm">نشط</span>
                     </div>
                     <p class="text-xs text-slate-500 font-semibold mt-1" id="header-subtitle">إدارة مسارات إلحاق الموظف والعروض الوظيفية للمنشأة الحالية</p>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="window.importExcelFile(event)">
-                    <button onclick="document.getElementById('excel-file-input').click()" class="px-4 py-2 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-all font-bold text-xs flex items-center gap-2 border border-slate-200">
+                    <button onclick="document.getElementById('excel-file-input').click()" class="px-3.5 py-2 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-all font-bold text-xs flex items-center gap-1.5 border border-slate-200">
                         <i class="fas fa-file-import text-blue-600"></i> استيراد
                     </button>
-                    <button onclick="window.exportToExcel()" class="px-4 py-2 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-all font-bold text-xs flex items-center gap-2 border border-slate-200">
-                        <i class="fas fa-file-excel text-emerald-600"></i> تصدير (نموذج)
+                    <button onclick="window.exportToExcel()" class="px-3.5 py-2 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-all font-bold text-xs flex items-center gap-1.5 border border-slate-200">
+                        <i class="fas fa-file-excel text-emerald-600"></i> تصدير
                     </button>
-                    <button onclick="window.openAddModal()" class="px-5 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full shadow-lg transition-all font-extrabold text-sm flex items-center gap-2 ml-2">
+                    <button onclick="window.openAddModal()" class="px-4.5 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full shadow-lg transition-all font-extrabold text-xs flex items-center gap-2">
                         <i class="fas fa-plus"></i> إضافة موظف
                     </button>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-6 relative bg-slate-50/50">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 relative bg-slate-50/50">
                 <div id="view-dashboard" class="block space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between shadow-sm">
                             <div>
                                 <p class="text-xs font-bold text-slate-500">إجمالي الموظفين (النشطين)</p>
@@ -211,50 +222,54 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-visible shadow-sm relative">
-                        <table class="w-full text-right border-collapse">
-                            <thead class="bg-slate-50 border-b border-slate-200">
-                                <tr>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">الاسم / المسمى الوظيفي</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">رقم الهوية</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">المرحلة الحالية</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">التصنيفات</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">نسبة الاكتمال</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500 text-center">إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="employees-table" class="divide-y divide-slate-100">
-                            </tbody>
-                        </table>
+                    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm relative">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-right border-collapse min-w-[700px]">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">الاسم / المسمى الوظيفي</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">رقم الهوية</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">المرحلة الحالية</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">التصنيفات</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">نسبة الاكتمال</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500 text-center">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employees-table" class="divide-y divide-slate-100">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div id="view-terminated" class="hidden space-y-6">
                     <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
-                        <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
+                        <div class="p-4 md:p-6 border-b bg-slate-50 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
                             <div>
-                                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">
+                                <h3 class="text-lg md:text-xl font-black text-slate-900 flex items-center gap-2">
                                     <i class="fas fa-file-invoice-dollar text-red-600"></i> سجل العقود المنتهية والمخالصات
                                 </h3>
                                 <p class="text-xs text-slate-500 mt-1">الموظفون الذين تم إنهاء عقودهم ويخضعون لمهام إخلاء الطرف وتصفية المستحقات</p>
                             </div>
                             <input type="file" id="contract-pdf-upload" accept=".pdf" class="hidden" onchange="window.handleContractPDFUpload(event)">
-                            <button onclick="document.getElementById('contract-pdf-upload').click()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md flex items-center gap-2 transition">
+                            <button onclick="document.getElementById('contract-pdf-upload').click()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs shadow-md flex items-center justify-center gap-2 transition">
                                 <i class="fas fa-file-pdf"></i> إرفاق ملف PDF لجلب البيانات
                             </button>
                         </div>
-                        <table class="w-full text-right border-collapse">
-                            <thead class="bg-slate-50 border-b border-slate-200">
-                                <tr>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">الاسم / المسمى الوظيفي</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">رقم الهوية</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500">تاريخ الإنهاء (آخر يوم عمل)</th>
-                                    <th class="p-4 text-xs font-extrabold text-slate-500 text-center">إجراءات المخالصة</th>
-                                </tr>
-                            </thead>
-                            <tbody id="terminated-table" class="divide-y divide-slate-100">
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-right border-collapse min-w-[650px]">
+                                <thead class="bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">الاسم / المسمى الوظيفي</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">رقم الهوية</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500">تاريخ الإنهاء (آخر يوم عمل)</th>
+                                        <th class="p-4 text-xs font-extrabold text-slate-500 text-center">إجراءات المخالصة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="terminated-table" class="divide-y divide-slate-100">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -277,16 +292,16 @@
                         </div>
                     </div>
 
-                    <div id="report-detail-container" class="hidden bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
+                    <div id="report-detail-container" class="hidden bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6">
                         <button onclick="window.closeReportDetail()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 rounded-full font-bold text-xs"><i class="fas fa-arrow-right ml-1"></i> العودة للتقارير</button>
                         <div id="report-detail-content"></div>
                     </div>
                 </div>
 
                 <div id="view-settings" class="hidden max-w-4xl mx-auto space-y-8">
-                    <div class="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-sm">
-                        <div class="flex justify-between items-center mb-6 border-b pb-4">
-                            <h3 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-sm">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 border-b pb-4">
+                            <h3 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-3">
                                 <span class="w-10 h-10 bg-black text-[#c5f82a] rounded-2xl flex items-center justify-center text-lg"><i class="fas fa-building"></i></span>
                                 إعدادات المنشأة الحالية
                             </h3>
@@ -299,25 +314,25 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 mb-2">اسم المنشأة (عربي)</label>
-                                    <input type="text" id="comp-name-ar" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold" required>
+                                    <input type="text" id="comp-name-ar" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold text-xs md:text-sm" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 mb-2">اسم المنشأة (إنجليزي)</label>
-                                    <input type="text" id="comp-name-en" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold" required>
+                                    <input type="text" id="comp-name-en" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold text-xs md:text-sm" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 mb-2">رقم السجل التجاري</label>
-                                    <input type="text" id="comp-cr" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold">
+                                    <input type="text" id="comp-cr" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold text-xs md:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-700 mb-2">العنوان والمدينة</label>
-                                    <input type="text" id="comp-address" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold">
+                                    <input type="text" id="comp-address" class="w-full border border-slate-200 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold text-xs md:text-sm">
                                 </div>
                             </div>
                             
                             <div class="mt-8 pt-6 border-t border-slate-200">
                                 <h4 class="text-base font-extrabold mb-4 text-slate-900">الأختام والتواقيع المزدوجة (لنماذج الـ PDF)</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                     <div class="border border-slate-200 rounded-2xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition">
                                         <p class="font-bold mb-2 text-xs text-slate-700">شعار المنشأة</p>
                                         <input type="file" id="comp-logo" accept="image/*" class="hidden">
@@ -358,7 +373,7 @@
                             </div>
                             
                             <div class="pt-6">
-                                <button type="button" onclick="window.saveCompanySettings()" class="bg-[#111315] hover:bg-black text-[#c5f82a] font-extrabold py-3.5 px-8 rounded-full shadow-lg transition-all flex items-center gap-2">
+                                <button type="button" onclick="window.saveCompanySettings()" class="w-full sm:w-auto bg-[#111315] hover:bg-black text-[#c5f82a] font-extrabold py-3.5 px-8 rounded-full shadow-lg transition-all flex items-center justify-center gap-2">
                                     <i class="fas fa-save"></i> حفظ إعدادات المنشأة واعتمادها
                                 </button>
                             </div>
@@ -370,36 +385,36 @@
         </main>
     </div>
 
-    <div id="add-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-200">
-            <div class="flex justify-between items-center p-6 border-b bg-slate-50 rounded-t-3xl sticky top-0 z-10">
-                <h3 id="modal-add-title" class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+    <div id="add-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay p-2 md:p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto border border-slate-200">
+            <div class="flex justify-between items-center p-4 md:p-6 border-b bg-slate-50 rounded-t-3xl sticky top-0 z-10">
+                <h3 id="modal-add-title" class="text-lg md:text-xl font-extrabold text-slate-900 flex items-center gap-2">
                     <span class="w-8 h-8 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-sm"><i class="fas fa-user-plus"></i></span>
                     إضافة موظف جديد
                 </h3>
                 <button onclick="window.closeAddModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 font-bold">&times;</button>
             </div>
             
-            <form id="add-form" class="p-6 space-y-6">
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
-                    <h4 class="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">البيانات الشخصية والوظيفية (حسب العقد)</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="md:col-span-2">
+            <form id="add-form" class="p-4 md:p-6 space-y-6">
+                <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200/60">
+                    <h4 class="font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2 text-sm">البيانات الشخصية والوظيفية (حسب العقد)</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="sm:col-span-2 md:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الرباعي <span class="text-red-500">*</span></label>
-                            <input type="text" id="emp-name" required class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <input type="text" id="emp-name" required class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">المهنة / المسمى الوظيفي <span class="text-red-500">*</span></label>
-                            <input type="text" id="emp-job" required oninput="window.updateSpecialties()" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <input type="text" id="emp-job" required oninput="window.updateSpecialties()" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">الرقم الوظيفي</label>
-                            <input type="text" id="emp-number" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="مثال: 11">
+                            <input type="text" id="emp-number" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm" placeholder="مثال: 11">
                         </div>
                         
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">الجنسية</label>
-                            <select id="emp-nationality" onchange="window.triggerSalaryRecalc()" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-nationality" onchange="window.triggerSalaryRecalc()" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="سعودي">سعودي</option>
                                 <option value="مصري">مصري</option>
                                 <option value="أردني">أردني</option>
@@ -411,15 +426,15 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الميلاد</label>
-                            <input type="date" id="emp-dob" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <input type="date" id="emp-dob" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهوية / الإقامة <span class="text-red-500">*</span></label>
-                            <input type="text" id="emp-nid" required maxlength="10" minlength="10" pattern="\d{10}" title="يجب إدخال 10 أرقام بالضبط" oninput="this.value = this.value.replace(/[^0-9]/g, ''); window.detectNationality();" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <input type="text" id="emp-nid" required maxlength="10" minlength="10" pattern="\d{10}" title="يجب إدخال 10 أرقام بالضبط" oninput="this.value = this.value.replace(/[^0-9]/g, ''); window.detectNationality();" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">نوع الهوية</label>
-                            <select id="emp-id-type" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-id-type" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="هوية وطنية">هوية وطنية</option>
                                 <option value="إقامة">إقامة</option>
                                 <option value="جواز سفر">جواز سفر</option>
@@ -428,25 +443,25 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ انتهاء الهوية</label>
-                            <input type="date" id="emp-id-expiry" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <input type="date" id="emp-id-expiry" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">الجنس</label>
-                            <select id="emp-gender" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-gender" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="ذكر">ذكر</option>
                                 <option value="أنثى">أنثى</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">الديانة</label>
-                            <select id="emp-religion" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-religion" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="مسلم">مسلم</option>
                                 <option value="غير مسلم">غير مسلم</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">الحالة الاجتماعية</label>
-                            <select id="emp-marital" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-marital" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="أعزب">أعزب</option>
                                 <option value="متزوج">متزوج</option>
                                 <option value="مطلق">مطلق</option>
@@ -454,42 +469,42 @@
                             </select>
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">المؤهل العلمي</label>
-                            <input type="text" id="emp-education" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="بكالوريوس أو ما يعادلها">
+                            <input type="text" id="emp-education" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm" placeholder="بكالوريوس أو ما يعادلها">
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">التخصص</label>
-                            <select id="emp-specialty" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-specialty" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="">اختر التخصص...</option>
                             </select>
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">رقم الآيبان</label>
-                            <input type="text" id="emp-iban" dir="ltr" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black text-left" placeholder="SA...">
+                            <input type="text" id="emp-iban" dir="ltr" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black text-left text-xs md:text-sm" placeholder="SA...">
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">اسم البنك</label>
-                            <input type="text" id="emp-bank" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="مصرف الراجحي">
+                            <input type="text" id="emp-bank" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm" placeholder="مصرف الراجحي">
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
-                            <input type="email" id="emp-email" dir="ltr" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-left" placeholder="email@example.com">
+                            <input type="email" id="emp-email" dir="ltr" class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black text-left text-xs md:text-sm" placeholder="email@example.com">
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">رقم الجوال</label>
-                            <input type="tel" id="emp-phone" dir="ltr" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black text-left" placeholder="9665XXXXXXXX">
+                            <input type="tel" id="emp-phone" dir="ltr" class="w-full border rounded-xl p-2.5 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-black text-left text-xs md:text-sm" placeholder="9665XXXXXXXX">
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ المباشرة</label>
-                            <input type="date" id="emp-date" required class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black border-emerald-300 bg-emerald-50 text-emerald-800">
+                            <input type="date" id="emp-date" required class="w-full border rounded-xl p-2.5 font-bold focus:outline-none focus:ring-2 focus:ring-black border-emerald-300 bg-emerald-50 text-emerald-800 text-xs md:text-sm">
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">مدة العقد</label>
-                            <select id="emp-contract-duration" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                            <select id="emp-contract-duration" class="w-full border rounded-xl p-2.5 bg-white font-bold focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm">
                                 <option value="سنة واحدة">سنة واحدة</option>
                                 <option value="سنتان">سنتان</option>
                                 <option value="غير محدد">غير محدد (مفتوح)</option>
@@ -498,9 +513,9 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
-                    <div class="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
-                        <h4 class="font-bold text-slate-800">التفاصيل المالية والراتب</h4>
+                <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200/60">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+                        <h4 class="font-bold text-slate-800 text-sm">التفاصيل المالية والراتب</h4>
                         <label class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-extrabold text-slate-700 cursor-pointer shadow-sm">
                             <input type="checkbox" id="gosi-new-system" class="w-4 h-4 rounded text-black focus:ring-black" onchange="window.triggerSalaryRecalc()">
                             تطبيق نظام التأمينات الجديد
@@ -510,79 +525,79 @@
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-700 mb-1">الراتب الإجمالي (توزيع تلقائي)</label>
                         <div class="relative">
-                            <input type="number" step="0.01" id="emp-total-salary" required class="w-full border-2 border-slate-300 rounded-xl p-4 text-xl font-black bg-white focus:outline-none focus:border-black" placeholder="أدخل إجمالي الراتب" oninput="window.distributeSalary(this.value)">
-                            <span class="absolute left-4 top-4 text-slate-400 font-extrabold text-lg">ريال</span>
+                            <input type="number" step="0.01" id="emp-total-salary" required class="w-full border-2 border-slate-300 rounded-xl p-3.5 text-lg md:text-xl font-black bg-white focus:outline-none focus:border-black" placeholder="أدخل إجمالي الراتب" oninput="window.distributeSalary(this.value)">
+                            <span class="absolute left-4 top-3 text-slate-400 font-extrabold text-base md:text-lg">ريال</span>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-white rounded-xl border border-slate-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-white rounded-xl border border-slate-200">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">الراتب الأساسي</label>
-                            <input type="number" step="0.01" id="emp-basic" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                            <input type="number" step="0.01" id="emp-basic" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold text-xs md:text-sm focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">بدل السكن</label>
-                            <input type="number" step="0.01" id="emp-housing" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                            <input type="number" step="0.01" id="emp-housing" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold text-xs md:text-sm focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">بدل النقل</label>
-                            <input type="number" step="0.01" id="emp-transport" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
+                            <input type="number" step="0.01" id="emp-transport" class="w-full border-b-2 border-slate-200 bg-slate-50 p-2 font-bold text-xs md:text-sm focus:border-black focus:outline-none rounded-lg" oninput="window.reverseCalculate()">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-red-500 mb-1">خصم التأمينات (GOSI)</label>
-                            <input type="number" step="0.01" id="emp-gosi-deduction" readonly class="w-full border-b-2 border-red-200 bg-red-50 text-red-600 p-2 font-bold rounded-lg cursor-not-allowed">
+                            <input type="number" step="0.01" id="emp-gosi-deduction" readonly class="w-full border-b-2 border-red-200 bg-red-50 text-red-600 p-2 font-bold text-xs md:text-sm rounded-lg cursor-not-allowed">
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
-                    <button type="button" onclick="window.closeAddModal()" class="px-6 py-2.5 rounded-full border border-slate-300 hover:bg-slate-100 font-bold text-xs">إلغاء</button>
-                    <button type="submit" class="px-8 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full font-extrabold text-xs shadow-lg">حفظ واعتماد الموظف</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="window.closeAddModal()" class="w-full sm:w-auto px-6 py-2.5 rounded-full border border-slate-300 hover:bg-slate-100 font-bold text-xs">إلغاء</button>
+                    <button type="submit" class="w-full sm:w-auto px-8 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full font-extrabold text-xs shadow-lg">حفظ واعتماد الموظف</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="details-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-overlay p-4">
+    <div id="details-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center modal-overlay p-2 md:p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl h-[95vh] flex flex-col border border-slate-200">
-            <div class="flex justify-between items-center p-6 border-b bg-slate-50 rounded-t-3xl shrink-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full bg-black text-[#c5f82a] flex items-center justify-center text-xl font-black shadow-md" id="d-avatar">أ</div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 md:p-6 border-b bg-slate-50 rounded-t-3xl shrink-0 gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-black text-[#c5f82a] flex items-center justify-center text-lg md:text-xl font-black shadow-md shrink-0" id="d-avatar">أ</div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-2xl font-black text-slate-900" id="d-name">اسم الموظف</h3>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-xl md:text-2xl font-black text-slate-900" id="d-name">اسم الموظف</h3>
                             <span id="d-status-badge" class="px-3 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">نشط</span>
                         </div>
                         <p class="text-xs text-slate-500 font-bold" id="d-job">المسمى الوظيفي</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button id="btn-terminate-emp" onclick="window.confirmTerminateEmployee()" class="px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-600 font-bold shadow-sm text-xs flex items-center gap-2 transition" title="إنهاء عقد الموظف ونقله للمخالصات">
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    <button id="btn-terminate-emp" onclick="window.confirmTerminateEmployee()" class="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-600 font-bold shadow-sm text-xs flex items-center gap-1.5 transition" title="إنهاء عقد الموظف ونقله للمخالصات">
                         <i class="fas fa-user-slash"></i> إنهاء العقد للمخالصة
                     </button>
                     <button onclick="window.closeDetailsModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 font-bold">&times;</button>
                 </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 bg-[#f8fafc] space-y-6">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-[#f8fafc] space-y-6">
                 <div id="d-action-buttons-bar" class="flex flex-wrap gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 items-center justify-center">
                 </div>
                 
-                <div id="d-onboarding-section" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
-                    <div class="flex justify-between items-center mb-6">
+                <div id="d-onboarding-section" class="bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
                         <h4 class="font-black text-slate-900 text-base">مسار إلحاق الموظف</h4>
                         <span id="d-progress-text" class="px-4 py-1.5 bg-slate-100 text-slate-800 font-extrabold rounded-full text-xs">20% مكتمل</span>
                     </div>
                     
-                    <div class="relative pt-4 pb-8">
-                        <div class="absolute top-8 left-10 right-10 h-2 bg-slate-100 rounded-full z-0"></div>
+                    <div class="relative pt-4 pb-8 overflow-x-auto">
+                        <div class="absolute top-8 left-10 right-10 h-2 bg-slate-100 rounded-full z-0 min-w-[500px]"></div>
                         <div id="d-timeline-bar" class="absolute top-8 right-10 h-2 rounded-full z-0 timeline-gradient" style="width: 20%;"></div>
-                        <div class="relative z-10 flex justify-between px-2" id="timeline-nodes-container"></div>
+                        <div class="relative z-10 flex justify-between px-2 min-w-[500px]" id="timeline-nodes-container"></div>
                     </div>
                 </div>
 
-                <div id="d-clearance-section" class="hidden bg-white p-6 rounded-3xl shadow-sm border border-red-200 space-y-6">
-                    <h4 class="font-black text-red-600 mb-2 border-b border-red-100 pb-3 flex items-center gap-2 text-lg">
+                <div id="d-clearance-section" class="hidden bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-red-200 space-y-6">
+                    <h4 class="font-black text-red-600 mb-2 border-b border-red-100 pb-3 flex items-center gap-2 text-base md:text-lg">
                         <i class="fas fa-file-invoice-dollar"></i> مهام المخالصة النهائية وإخلاء الطرف وحساب المستحقات
                     </h4>
                     
@@ -592,12 +607,12 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                        <div class="flex justify-between items-center mb-4">
+                    <div class="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                             <p class="text-sm font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-calculator text-blue-600"></i> 2. إعداد بيانات التصفية المالية</p>
                             <div class="text-xs font-bold text-slate-500">تاريخ المباشرة: <span id="cls-disp-start-date" class="text-emerald-600"></span></div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الإنهاء (آخر يوم عمل)</label>
                                 <input type="date" id="cls-last-day" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-xs bg-white focus:ring-2 focus:ring-blue-500" onchange="window.saveClearanceProgress()">
@@ -610,14 +625,14 @@
                                 <label class="block text-xs font-bold text-slate-700 mb-1">الإجازات المستنفذة (أيام)</label>
                                 <input type="number" step="0.01" id="cls-leave-used" value="0" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-xs bg-white focus:ring-2 focus:ring-blue-500" oninput="window.saveClearanceProgress()">
                             </div>
-                            <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 col-span-1 md:col-span-2">
+                            <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 sm:col-span-2 md:col-span-2">
                                 <label class="block text-xs font-bold text-blue-800 mb-1">أيام مستحقة للموظف من الشهر (+)</label>
                                 <div class="flex gap-2">
                                     <input type="number" step="0.01" id="cls-extra-days" value="0" class="w-1/2 border border-blue-200 rounded-lg p-2 font-bold text-xs bg-white focus:ring-2 focus:ring-blue-500" placeholder="عدد الأيام" oninput="window.saveClearanceProgress()">
                                     <span class="w-1/2 flex items-center text-[10px] text-blue-600 font-bold leading-tight">سيتم حساب قيمتها من الإجمالي</span>
                                 </div>
                             </div>
-                            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 col-span-1 md:col-span-2">
+                            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 sm:col-span-2 md:col-span-2">
                                 <label class="block text-xs font-bold text-emerald-800 mb-1">مكافأة إضافية مقطوعة (+)</label>
                                 <input type="number" step="0.01" id="cls-bonus-amt" value="0" class="w-full border border-emerald-200 rounded-lg p-2 font-bold text-xs bg-white focus:ring-2 focus:ring-emerald-500" placeholder="مبلغ المكافأة" oninput="window.saveClearanceProgress()">
                             </div>
@@ -645,9 +660,9 @@
                                 <input type="number" step="0.01" id="cls-last-paid-val" value="0" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-xs bg-white focus:ring-2 focus:ring-blue-500" oninput="window.saveClearanceProgress()">
                             </div>
 
-                            <div class="col-span-1 md:col-span-4 mt-2">
+                            <div class="col-span-1 sm:col-span-2 md:col-span-4 mt-2">
                                 <label class="block text-sm font-bold text-red-600 mb-2 border-b pb-1">الخصومات (تخصم من الإجمالي)</label>
-                                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600 mb-1">خصم التأمينات (-)</label>
                                         <input type="number" step="0.01" id="cls-ded-gosi" value="0" class="w-full border border-red-200 rounded-lg p-2 font-bold text-xs bg-white focus:ring-1 focus:ring-red-500" oninput="window.saveClearanceProgress()">
@@ -679,7 +694,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/80">
                         <h4 class="font-black text-slate-800 mb-4 border-b pb-2 text-sm">التفاصيل المالية الثابتة</h4>
                         <div class="space-y-3 text-xs font-semibold">
                             <div class="flex justify-between"><span class="text-slate-500">إجمالي الراتب:</span> <span class="font-bold text-slate-900" id="d-total">0</span></div>
@@ -691,12 +706,12 @@
                         </div>
                     </div>
                     
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80">
+                    <div class="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200/80">
                         <h4 class="font-black text-slate-800 mb-4 border-b pb-2 text-sm">البيانات الإضافية</h4>
                         <div class="space-y-3 text-xs font-semibold">
-                            <div class="flex justify-between"><span class="text-slate-500">رقم الهوية:</span> <span class="font-bold text-slate-900" id="d-nid">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">رقم الهوية:</span> <span class="font-bold text-slate-900 font-mono" id="d-nid">-</span></div>
                             <div class="flex justify-between"><span class="text-slate-500">الجنسية:</span> <span class="font-bold text-slate-900" id="d-nationality">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">تاريخ المباشرة:</span> <span class="font-bold text-emerald-600" id="d-start-date">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">تاريخ المباشرة:</span> <span class="font-bold text-emerald-600 font-mono" id="d-start-date">-</span></div>
                         </div>
                     </div>
                 </div>
@@ -989,6 +1004,18 @@
             setupImageUpload('comp-mgr-sign', 'prev-mgr-sign', 'mgrSignBase64');
         });
 
+        window.toggleMobileSidebar = function() {
+            const sb = document.getElementById('main-sidebar');
+            if (!sb) return;
+            if (sb.classList.contains('hidden')) {
+                sb.classList.remove('hidden');
+                sb.classList.add('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
+            } else {
+                sb.classList.remove('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
+                sb.classList.add('hidden');
+            }
+        };
+
         window.showToast = function(message, type = 'success') {
             const container = document.getElementById('toast-container');
             if (!container) return;
@@ -1012,6 +1039,12 @@
             const targetBtn = document.getElementById(`btn-${viewName}`);
             if (targetView) targetView.classList.remove('hidden');
             if (targetBtn) targetBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-full bg-[#c5f82a] text-black font-extrabold transition-all shadow-md view-btn";
+
+            const sb = document.getElementById('main-sidebar');
+            if (sb && window.innerWidth < 768 && !sb.classList.contains('hidden')) {
+                sb.classList.remove('flex', 'fixed', 'inset-4', 'z-50', 'bg-[#111315]', 'p-4', 'rounded-3xl', 'shadow-2xl', 'overflow-y-auto', 'max-h-[90vh]');
+                sb.classList.add('hidden');
+            }
         };
 
         function renderCompanySelector() {
@@ -1187,7 +1220,6 @@
             window.isAddingTerminated = isTerminated;
             document.getElementById('add-form')?.reset();
             
-            // تفريغ الحقول الجديدة
             const extraFields = ['emp-number', 'emp-dob', 'emp-id-expiry', 'emp-education', 'emp-iban', 'emp-bank', 'emp-email', 'emp-phone'];
             extraFields.forEach(id => {
                 const el = document.getElementById(id);
@@ -1203,13 +1235,13 @@
                 if (isTerminated) {
                     titleEl.innerHTML = '<span class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-sm"><i class="fas fa-file-contract"></i></span> إضافة بيانات عقد منتهي لتسوية المخالصة';
                     if (submitBtn) {
-                        submitBtn.className = "px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-extrabold text-xs shadow-lg";
+                        submitBtn.className = "w-full sm:w-auto px-8 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-extrabold text-xs shadow-lg";
                         submitBtn.innerHTML = "حفظ العقد وبدء المخالصة";
                     }
                 } else {
                     titleEl.innerHTML = '<span class="w-8 h-8 bg-black text-[#c5f82a] rounded-full flex items-center justify-center text-sm"><i class="fas fa-user-plus"></i></span> إضافة موظف جديد';
                     if (submitBtn) {
-                        submitBtn.className = "px-8 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full font-extrabold text-xs shadow-lg";
+                        submitBtn.className = "w-full sm:w-auto px-8 py-2.5 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full font-extrabold text-xs shadow-lg";
                         submitBtn.innerHTML = "حفظ واعتماد الموظف";
                     }
                 }
@@ -1219,55 +1251,6 @@
         
         window.closeAddModal = function() { document.getElementById('add-modal')?.classList.add('hidden'); };
         window.closeDetailsModal = function() { document.getElementById('details-modal')?.classList.add('hidden'); selectedEmployeeId = null; };
-
-        window.handleContractPDFUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            window.showToast('جاري قراءة ملف الـ PDF واستخراج البيانات...', 'warning');
-            
-            // محاكاة عملية استخراج البيانات من ملف الـ PDF (كمثال: تعبئة بيانات الطرف الثاني المرفقة في صورتك)
-            setTimeout(() => {
-                window.openAddModal(true);
-                
-                // تعبئة البيانات الشخصية والوظيفية المستخرجة من العقد تلقائياً
-                document.getElementById('emp-name').value = 'شادن صالح بن عبدالعزيز الدوسري';
-                document.getElementById('emp-job').value = 'معلم تمهيدي';
-                document.getElementById('emp-number').value = '11';
-                document.getElementById('emp-nationality').value = 'سعودي';
-                document.getElementById('emp-nid').value = '1127814489';
-                document.getElementById('emp-id-type').value = 'هوية وطنية';
-                document.getElementById('emp-gender').value = 'أنثى';
-                document.getElementById('emp-religion').value = 'مسلم';
-                document.getElementById('emp-marital').value = 'متزوج';
-                document.getElementById('emp-education').value = 'بكالوريوس أو ما يعادلها';
-                
-                // إدراج التخصص وتحديده
-                const specSelect = document.getElementById('emp-specialty');
-                if (specSelect) {
-                    specSelect.innerHTML = '<option value="تعليم ما قبل الابتدائي (رياض الأطفال)">تعليم ما قبل الابتدائي (رياض الأطفال)</option>';
-                    specSelect.value = 'تعليم ما قبل الابتدائي (رياض الأطفال)';
-                }
-
-                document.getElementById('emp-iban').value = 'SA1280000298608016047244';
-                document.getElementById('emp-bank').value = 'مصرف الراجحي';
-                document.getElementById('emp-email').value = 'sha.sdos99@gmail.com';
-                document.getElementById('emp-phone').value = '9660565395565';
-                
-                // تعبئة راتب افتراضي للتجربة وحسابه
-                const totalInput = document.getElementById('emp-total-salary');
-                if(totalInput) {
-                    totalInput.value = '4550';
-                    window.distributeSalary('4550');
-                }
-                
-                // تحديث التأمينات والجنسية بناءً على البيانات المستخرجة
-                window.detectNationality();
-
-                window.showToast('تم استخراج البيانات وتعبئتها بنجاح. يرجى المراجعة والاعتماد.', 'success');
-                event.target.value = ''; // إعادة تعيين حقل الملف لتمكين رفع ملف آخر إذا لزم الأمر
-            }, 1500);
-        };
 
         document.getElementById('add-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -1284,7 +1267,6 @@
                 specialty: document.getElementById('emp-specialty')?.value || '', startDate: document.getElementById('emp-date')?.value || new Date().toISOString().split('T')[0],
                 contractDuration: document.getElementById('emp-contract-duration')?.value || 'سنة واحدة',
                 
-                // حفظ البيانات الجديدة المضافة
                 empNumber: document.getElementById('emp-number')?.value || '',
                 dob: document.getElementById('emp-dob')?.value || '',
                 idType: document.getElementById('emp-id-type')?.value || 'هوية وطنية',
@@ -1371,11 +1353,11 @@
                 (emp.tags || []).forEach((tag, i) => { tagsHtml += `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">${tag}<button onclick="event.stopPropagation(); window.removeTag('${emp.id}', ${i})" class="hover:text-red-600 bg-white/50 rounded-full w-3 h-3 flex items-center justify-center ml-0.5">&times;</button></span>`; });
                 tagsHtml += `<button onclick="event.stopPropagation(); window.toggleTagMenu(event, '${emp.id}')" class="inline-flex items-center justify-center w-6 h-5 rounded-md bg-slate-200 hover:bg-blue-600 hover:text-white text-slate-600 text-xs font-bold transition shadow-sm">+</button>`;
                 tr.innerHTML = `
-                    <td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-900 text-[#c5f82a] flex items-center justify-center font-black">${emp.name ? emp.name.charAt(0) : 'م'}</div><div><div class="font-extrabold text-slate-900 text-sm">${emp.name}</div><div class="text-[11px] text-slate-500 font-bold">${emp.jobTitle} ${emp.specialty ? ' - '+emp.specialty : ''}</div></div></div></td>
+                    <td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-900 text-[#c5f82a] flex items-center justify-center font-black shrink-0">${emp.name ? emp.name.charAt(0) : 'م'}</div><div><div class="font-extrabold text-slate-900 text-sm">${emp.name}</div><div class="text-[11px] text-slate-500 font-bold">${emp.jobTitle} ${emp.specialty ? ' - '+emp.specialty : ''}</div></div></div></td>
                     <td class="p-4 font-mono font-bold text-xs">${emp.nid}</td>
                     <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-black bg-[#c5f82a] text-black">المرحلة ${emp.currentStage}</span></td>
                     <td class="p-4"><div class="flex flex-wrap gap-1 items-center">${tagsHtml}</div></td>
-                    <td class="p-4"><div class="flex items-center gap-2"><div class="w-full bg-slate-200 rounded-full h-2"><div class="h-2 rounded-full timeline-gradient" style="width: ${emp.progress}%"></div></div><span class="text-xs font-black text-slate-800">${emp.progress}%</span></div></td>
+                    <td class="p-4"><div class="flex items-center gap-2"><div class="w-full bg-slate-200 rounded-full h-2 w-24"><div class="h-2 rounded-full timeline-gradient" style="width: ${emp.progress}%"></div></div><span class="text-xs font-black text-slate-800">${emp.progress}%</span></div></td>
                     <td class="p-4 text-center"><button onclick="window.openEmployeeDetails('${emp.id}')" class="text-xs font-extrabold text-black px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full shadow-sm">إدارة <i class="fas fa-chevron-left text-[10px] ml-1"></i></button></td>
                 `;
                 tbody.appendChild(tr);
@@ -1388,11 +1370,11 @@
             termEmps.forEach(emp => {
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
                 tr.innerHTML = `
-                    <td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black">${emp.name ? emp.name.charAt(0) : 'م'}</div><div><div class="font-extrabold text-slate-900 text-sm line-through decoration-red-500">${emp.name}</div><div class="text-xs text-slate-500 font-bold">${emp.jobTitle}</div></div></div></td>
+                    <td class="p-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black shrink-0">${emp.name ? emp.name.charAt(0) : 'م'}</div><div><div class="font-extrabold text-slate-900 text-sm line-through decoration-red-500">${emp.name}</div><div class="text-xs text-slate-500 font-bold">${emp.jobTitle}</div></div></div></td>
                     <td class="p-4 font-mono font-bold text-xs text-slate-500">${emp.nid}</td>
                     <td class="p-4 font-mono font-bold text-xs text-red-600">${emp.clearanceData?.lastDay || '-'}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="window.openEmployeeDetails('${emp.id}')" class="text-xs font-extrabold text-white px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full shadow-md"><i class="fas fa-file-invoice-dollar ml-1"></i> إدارة المخالصة</button>
+                    <td class="p-4 text-center whitespace-nowrap">
+                        <button onclick="window.openEmployeeDetails('${emp.id}')" class="text-xs font-extrabold text-white px-3.5 py-2 bg-red-600 hover:bg-red-700 rounded-full shadow-md"><i class="fas fa-file-invoice-dollar ml-1"></i> إدارة المخالصة</button>
                         <button onclick="window.confirmDeleteEmployee('${emp.id}')" class="text-xs font-extrabold text-red-600 px-3 py-2 bg-slate-100 hover:bg-red-100 rounded-full mr-2"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
@@ -1423,7 +1405,7 @@
                 statusBadge.innerText = 'عقد منتهي'; statusBadge.className = 'px-3 py-0.5 rounded-full text-xs font-extrabold bg-red-100 text-red-800';
                 onboardingSec.classList.add('hidden'); clearanceSec.classList.remove('hidden'); terminateBtn.classList.add('hidden');
                 
-                actionButtonsBar.innerHTML = `<button onclick="window.generateSettlementPDF()" class="px-8 py-3 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full text-sm font-black shadow-lg flex items-center gap-2 transition w-full md:w-auto"><i class="fas fa-file-invoice-dollar"></i> إنشاء تصفية مستحقات نهاية الخدمة</button>`;
+                actionButtonsBar.innerHTML = `<button onclick="window.generateSettlementPDF()" class="px-6 py-3 bg-[#111315] hover:bg-black text-[#c5f82a] rounded-full text-xs md:text-sm font-black shadow-lg flex items-center justify-center gap-2 transition w-full"><i class="fas fa-file-invoice-dollar"></i> إنشاء تصفية مستحقات نهاية الخدمة</button>`;
                 
                 document.getElementById('cls-disp-start-date').innerText = emp.startDate || '-';
                 if(emp.clearanceData) {
@@ -1445,7 +1427,7 @@
             } else {
                 statusBadge.innerText = 'نشط'; statusBadge.className = 'px-3 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800';
                 onboardingSec.classList.remove('hidden'); clearanceSec.classList.add('hidden'); terminateBtn.classList.remove('hidden');
-                actionButtonsBar.innerHTML = `<button onclick="window.generateOfferPDF()" class="px-5 py-2.5 bg-[#111315] hover:bg-white hover:text-black text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2 border border-slate-700 transition"><i class="fas fa-file-pdf text-[#c5f82a]"></i> إنشاء العرض الوظيفي</button><button onclick="window.showToast('تم نسخ رابط البوابة للحافظة')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-extrabold shadow flex items-center gap-2 transition"><i class="fas fa-link"></i> رابط البوابة</button>`;
+                actionButtonsBar.innerHTML = `<button onclick="window.generateOfferPDF()" class="px-5 py-2.5 bg-[#111315] hover:bg-white hover:text-black text-white rounded-full text-xs font-extrabold shadow flex items-center justify-center gap-2 border border-slate-700 transition w-full sm:w-auto"><i class="fas fa-file-pdf text-[#c5f82a]"></i> إنشاء العرض الوظيفي</button><button onclick="window.showToast('تم نسخ رابط البوابة للحافظة')" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs font-extrabold shadow flex items-center justify-center gap-2 transition w-full sm:w-auto"><i class="fas fa-link"></i> رابط البوابة</button>`;
                 renderTimelineNodes(emp);
             }
 
@@ -1517,37 +1499,32 @@
                 
                 window.openAddModal(true);
                 
-                // استخراج رقم الهوية (10 أرقام تبدأ بـ 1 أو 2)
                 const idMatch = text.match(/\b([12]\d{9})\b/);
                 if (idMatch) {
                     const nidInput = document.getElementById('emp-nid');
                     if(nidInput) { nidInput.value = idMatch[1]; window.detectNationality(); }
                 }
                 
-                // استخراج رقم الآيبان
                 const ibanMatch = text.match(/\b(SA\d{22})\b/i) || text.match(/SA\s*\d{2}\s*\d{4}\s*\d{4}\s*\d{4}\s*\d{4}\s*\d{4}/i);
                 if (ibanMatch) {
                     const cleanIban = ibanMatch[0].replace(/\s/g, '').toUpperCase();
                     if(document.getElementById('emp-iban')) document.getElementById('emp-iban').value = cleanIban;
                 }
                 
-                // استخراج رقم الجوال
                 const phoneMatch = text.match(/\b(05\d{8}|9665\d{8})\b/);
                 if (phoneMatch) {
                     if(document.getElementById('emp-phone')) document.getElementById('emp-phone').value = phoneMatch[1];
                 }
                 
-                // استخراج البريد الإلكتروني
                 const emailMatch = text.match(/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/);
                 if (emailMatch) {
                     if(document.getElementById('emp-email')) document.getElementById('emp-email').value = emailMatch[1];
                 }
 
-                // استخراج الراتب الإجمالي (بحث مبدئي عن أرقام كبيرة مثل 4000، 5000)
                 const salaryMatch = text.match(/\b([3-9]\d{3}|[1-5]\d{4})\b/);
                 if (salaryMatch) {
                     const salInput = document.getElementById('emp-total-salary');
-                    if (salInput && !salInput.value) { // فقط إذا كان فارغاً
+                    if (salInput && !salInput.value) {
                         salInput.value = salaryMatch[1];
                         window.distributeSalary(salaryMatch[1]);
                     }
@@ -1644,7 +1621,7 @@
                 for (let job in jobCounts) { jobsHtml += `<div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100"><span class="font-bold">${job}</span><span class="px-3 py-1 bg-black text-[#c5f82a] rounded-full text-xs font-black shadow-sm">${jobCounts[job]} موظف</span></div>`; }
                 document.getElementById('report-detail-content').innerHTML = `
                     <h3 class="text-2xl font-black mb-4">تقرير القوى العاملة والتوطين</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
                         <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100"><p class="text-xs text-blue-600 font-bold">إجمالي الموظفين</p><p class="text-3xl font-black text-blue-900 mt-2">${total}</p></div>
                         <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-100"><p class="text-xs text-emerald-600 font-bold">نسبة التوطين</p><p class="text-3xl font-black text-emerald-700 mt-2">${saudizationRate}%</p></div>
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200"><p class="text-xs text-slate-500 font-bold">سعودي / مقيم</p><p class="text-xl font-black text-slate-800 mt-2">${saudis} / ${total - saudis}</p></div>
@@ -1687,7 +1664,6 @@
                                 jobTitle: row['المسمى الوظيفي'] || 'موظف', specialty: row['التخصص'] || '',
                                 startDate: row['تاريخ المباشرة'] || new Date().toISOString().split('T')[0], contractDuration: row['مدة العقد'] || 'سنة واحدة',
                                 
-                                // إضافة الحقول الجديدة للاستيراد
                                 empNumber: row['الرقم الوظيفي'] || '',
                                 dob: row['تاريخ الميلاد'] || '',
                                 idType: row['نوع الهوية'] || 'هوية وطنية',
